@@ -1,0 +1,9 @@
+{
+    "profiles": [
+        {
+            "name" : "RBC",
+            "display_name" : "rat barrel cortex"                        
+        }
+    ],
+    "default_profile": "RBC"
+}

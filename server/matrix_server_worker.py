@@ -19,9 +19,8 @@ def loadJson(filename):
 
 
 def init(props, dataDir):
-    props["matrixDataDir"] = dataDir
-    metaFile = "meta.json"
-    props["meta"] = loadJson(os.path.join(props["matrixDataDir"], metaFile))
+    props["matrixDataDir"] = dataDir        
+    props["profiles"] = loadJson(os.path.join(props["matrixDataDir"], metaFile))
 
 """
 def filterNeurons(props, selection):

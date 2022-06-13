@@ -1,28 +1,27 @@
-import flask
-import io
 import os
 import json
 import sys
-
-from flask import request, jsonify
-from flask_cors import CORS, cross_origin
-
-import matrix_server_worker
-import matrix_server_tiling
+import flask
+from flask import request
+from flask_cors import cross_origin
 
 app = flask.Flask(__name__)
 
 
-@app.route("/matrixServer/getMeta", methods=["GET", "POST"])
+def loadJson(filename):
+    with open(filename) as f:
+        return json.load(f)
+
+
+@app.route("/matrixServer/getProfiles", methods=["GET", "POST"])
 @cross_origin()
-def getMeta():
+def getProfiles():
     global props
     if request.method == "POST":
         if request.data:
             data = request.get_json(force=True)
-            print("getMeta request:", data)
-            response_data = props["meta"]
-            return json.dumps(response_data)
+            print("getProfiles request:", data)
+            return json.dumps(props)
 
 
 @app.route("/matrixServer/test", methods=["GET", "POST"])
@@ -42,8 +41,16 @@ if __name__ == "__main__":
         printUsageAndExit()
 
     dataDir = sys.argv[1]
+
     props = {}
-    matrix_server_worker.init(props, dataDir)    
+    profilesJson = loadJson(os.path.join(dataDir, "profiles.json"))
+    profiles = profilesJson["profiles"]
+    props["default_profile"] = profilesJson["default_profile"]
+    
+    for profile in profiles:
+        profileName = profile["name"]        
+        props[profileName] = loadJson(os.path.join(dataDir, "{}.json".format(profileName)))
+    
     app.run(host="localhost", port=5000)
     
 

@@ -13,7 +13,7 @@ Start matrix server
 ```
 cd cis-scripts
 conda activate matrix-server
-python matrix_server.py <path-to-dataset>
+python matrix_server.py ../data
 ```
 
 Start matrix compute server
