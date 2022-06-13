@@ -11,14 +11,14 @@ pip install flask-cors
 
 Start matrix server
 ```
-cd cis-scripts
+cd server
 conda activate matrix-server
 python matrix_server.py ../data
 ```
 
 Start matrix compute server
 ```
-cd cis-scripts
+cd server
 conda activate matrix-server
 python matrix_compute_server.py <path-to-dataset>
 ```
