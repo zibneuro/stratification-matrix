@@ -4,12 +4,14 @@
             "name": "cell_type",
             "display_name": "cell type",
             "property_type" : "categorical",
+            "color" : "#8dd3c7",
             "values" : ["L2PY", "L3PY", "L4PY", "L4sp", "L4ss", "L5IT", "L5PT", "L6CC", "L6INV", "L6CT", "VPM", "INH"]
         },
         {
             "name" : "cortical_column",
             "display_name": "cortical column",
             "property_type" : "categorical",
+            "color" : "#80b1d3",
             "values" : ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4", "E1", "E2", "E3", "E4", "Alpha", "Beta", "Gamma", "Delta"]
         }
     ]
