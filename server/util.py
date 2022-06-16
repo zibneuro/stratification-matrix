@@ -15,6 +15,11 @@ def makeDir(dirname):
         os.mkdir(dirname)
 
 
+def loadJson(filename):
+    with open(filename) as f:
+        return json.load(f)
+
+
 def getHeaderCols(filename):
     with open(filename) as f:
         headerLine = f.readline()

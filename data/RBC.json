@@ -13,6 +13,41 @@
             "property_type" : "categorical",
             "color" : "#80b1d3",
             "values" : ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4", "E1", "E2", "E3", "E4", "Alpha", "Beta", "Gamma", "Delta"]
+        },
+        {
+            "name" : "subregion",
+            "display_name": "subregion",
+            "property_type" : "categorical",
+            "color" : "#ffffb3",
+            "values" : ["inside", "septum", "other"]
+        },
+        {
+            "name" : "cortical_depth",
+            "display_name": "cortical depth",
+            "property_type" : "categorical",
+            "color" : "#bebada",
+            "values" : ["100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500", "1600", "1700", "1800", "1900", "2000", "2100", "2200", "other"]
+        },
+        {
+            "name" : "soma_x",
+            "display_name": "soma x-coord",
+            "property_type" : "categorical",
+            "color" : "#fb8072",
+            "values" : ["-1000", "-900", "-800", "-700", "-600", "-500", "-400", "-300", "-200", "-100", "0", "100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "other"]
+        },
+        {
+            "name" : "soma_y",
+            "display_name": "soma y-coord",
+            "property_type" : "categorical",
+            "color" : "#fdb462",
+            "values" : ["-700", "-600", "-500", "-400", "-300", "-200", "-100", "0", "100", "200", "300", "400", "500", "600", "700", "800", "900", "1000", "1100", "1200", "1300", "1400", "1500", "other"]
+        },
+        {
+            "name" : "soma_z",
+            "display_name": "soma z-coord",
+            "property_type" : "categorical",
+            "color" : "#fccde5",
+            "values" : ["-1400", "-1300", "-1200", "-1100", "-1000", "-900", "-800", "-700", "-600", "-500", "-400", "-300", "-200", "-100", "0", "100", "200", "300", "400", "500", "600", "700", "other"]
         }
     ]
 }
