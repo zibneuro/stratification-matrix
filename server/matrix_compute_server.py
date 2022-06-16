@@ -16,13 +16,12 @@ app = flask.Flask(__name__)
 def getTiles():
     global processors
     if request.method == "POST":
-        print("getTiles")
         if request.data:
             data = request.get_json(force=True)
             #print(">> request Raw", data)
             profileName = data["profile"]            
             tiles = processors[profileName].computeTileData(data)            
-            return json.dumps(tiles)
+            return json.dumps(tiles)            
 
 
 
