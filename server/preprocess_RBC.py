@@ -79,25 +79,34 @@ if __name__ == "__main__":
     celltype_values, celltype_id_value = getCelltypes(os.path.join(rbcFolder, "cell_types.csv"))
     region_id_defaultName, column_values, region_id_column_value, subregion_values, region_id_subregion_value = getRegions(os.path.join(rbcFolder, "regions.csv"))
     
-    headerCols = util.getHeaderCols(neuronsFile)
-    
+    headerCols = util.getHeaderCols(neuronsFile)    
+    def getColIdx(name):
+        return headerCols.index(name)
+
     neurons = np.loadtxt(neuronsFile, skiprows=1, delimiter=",")
     mask_inside = getFilterMaskInside(neurons[:,headerCols.index("region")], region_id_defaultName)
     neurons = neurons[mask_inside, :]
 
+    bins_cell_type = util.binCategoricalAttributes(neurons[:,getColIdx("cell_type")], celltype_values, celltype_id_value)
+    util.writeBins(rbcFolder, "cell_type", bins_cell_type)
+
+    bins_cortical_column = util.binCategoricalAttributes(neurons[:,getColIdx("region")], column_values, region_id_column_value)
+    util.writeBins(rbcFolder, "cortical_column", bins_cortical_column)
+
+    bins_subregion = util.binCategoricalAttributes(neurons[:,getColIdx("region")], subregion_values, region_id_subregion_value)
+    util.writeBins(rbcFolder, "subregion", bins_subregion)    
     
-
     print("ranges")
-    util.printDataRange("soma_x", neurons[:,headerCols.index("soma_x")])
-    util.printDataRange("soma_y", neurons[:,headerCols.index("soma_y")])
-    util.printDataRange("soma_z", neurons[:,headerCols.index("soma_z")], -4000)
-    util.printDataRange("cortical_depth", neurons[:,headerCols.index("cortical_depth")], -1)
+    util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")])
+    util.printDataRange("soma_y", neurons[:,getColIdx("soma_y")])
+    util.printDataRange("soma_z", neurons[:,getColIdx("soma_z")], -4000)
+    util.printDataRange("cortical_depth", neurons[:,getColIdx("cortical_depth")], -1)
 
-    bins_soma_x = util.binNumericAttributes(neurons[:,headerCols.index("soma_x")], -1100, 1300, 100)
+    bins_soma_x = util.binNumericAttributes(neurons[:,getColIdx("soma_x")], -1100, 1300, 100)
     util.writeBins(rbcFolder, "soma_x", bins_soma_x)
-    bins_soma_y = util.binNumericAttributes(neurons[:,headerCols.index("soma_y")], -800, 1400, 100)
+    bins_soma_y = util.binNumericAttributes(neurons[:,getColIdx("soma_y")], -800, 1400, 100)
     util.writeBins(rbcFolder, "soma_y", bins_soma_y)
-    bins_soma_z = util.binNumericAttributes(neurons[:,headerCols.index("soma_z")], -1500, 600, 100)
+    bins_soma_z = util.binNumericAttributes(neurons[:,getColIdx("soma_z")], -1500, 600, 100)
     util.writeBins(rbcFolder, "soma_z", bins_soma_z)
-    bins_cortical_depth = util.binNumericAttributes(neurons[:,headerCols.index("cortical_depth")], 0, 2100, 100)
+    bins_cortical_depth = util.binNumericAttributes(neurons[:,getColIdx("cortical_depth")], 0, 2100, 100)
     util.writeBins(rbcFolder, "cortical_depth", bins_cortical_depth)

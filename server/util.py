@@ -29,8 +29,6 @@ def printDataRange(name, dataColumn, invalidValue = None):
     print(name, np.min(dataColumn[filterMask]), np.max(dataColumn[filterMask]))
 
 
-
-
 def assertMaskConsistency(dataColumn, bins):
     count = 0
     for bin in bins:
@@ -55,6 +53,26 @@ def writeBins(baseFolder, propertyName, bins):
         json.dump(meta, f)
     
 
+def binCategoricalAttributes(dataColumn, values, valueId_value):
+    value_mask = {}
+    for value in values:
+        value_mask[value] = np.zeros(dataColumn.size, dtype=bool)
+
+    for i in range(0, dataColumn.size):
+        valueId = dataColumn[i]
+        value = valueId_value[valueId]
+        value_mask[value][i] = True
+
+    bins = []
+    for value in values:
+        bins.append({
+            "value" : value,
+            "mask" : value_mask[value]
+        })
+
+    assertMaskConsistency(dataColumn, bins)
+    return bins
+
 
 def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step):
     bins = [] 
@@ -75,7 +93,6 @@ def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step
     })
 
     assertMaskConsistency(dataColumn, bins)
-
     return bins
 
 
