@@ -1,3 +1,4 @@
 *.pyc
 data/RBC
+data/VIS
 server/scratch.py

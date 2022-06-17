@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 import numpy as np
 
 import util 
@@ -9,62 +10,23 @@ def printUsageAndExit():
     exit()
 
 
-def getCelltypes(filename):
-    celltype_values = []
-    celltype_id_value = {}
-    with open(filename) as f:
-        lines = f.readlines()
-        for i in range(1, len(lines)):
-            parts = lines[i].rstrip().split(",")    
-            celltypeId = int(parts[0])
-            celltypeValue = parts[1]
-            celltype_values.append(celltypeValue)
-            celltype_id_value[celltypeId] = celltypeValue
-    return celltype_values, celltype_id_value 
+def getCelltypes():
+    values = ["EXC", "INH"]
+    id_value = {
+        1 : "EXC",
+        2 : "INH",
+    }
+    return values, id_value
 
 
-def getRegions(filename):
-    region_id_defaultName = {}
-    column_values = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4", "C1", "C2", "C3", "C4", "D1", "D2", "D3", "D4", "E1", "E2", "E3", "E4", "Alpha", "Beta", "Gamma", "Delta"]
-    region_id_column_value = {}
-    subregion_values = ["inside", "septum", "other"]  
-    region_id_subregion_value = {}
-    ignoreList = ["Brain","Neocortex","Thalamus","S1","S1_Surrounding","S1_Septum"]
-
-    def getColumnFromName(name):
-        return name.replace("_Barreloid","").replace("S1_Surrounding_","").replace("S1_Septum_","")
-
-    def getSubregionFromName(name):
-        if("Septum" in name):
-            return "septum"
-        elif("_Barreloid" in name):
-            return "other"
-        elif("S1_Surrounding" in name):
-            return "other"
-        else:
-            return "inside"        
-
-    with open(filename) as f:
-        lines = f.readlines()
-        for i in range(1, len(lines)):
-            parts = lines[i].rstrip().split(",")    
-            regionId = int(parts[0])
-            regionName = parts[1]
-            region_id_defaultName[regionId] = regionName
-            if(regionName not in ignoreList):
-                region_id_column_value[regionId] = getColumnFromName(regionName)
-                region_id_subregion_value[regionId] = getSubregionFromName(regionName)
-
-    return region_id_defaultName, column_values, region_id_column_value, subregion_values, region_id_subregion_value
-
-
-def getFilterMaskInside(dataCol, region_id_defaultName):
-    mask = np.ones(dataCol.size, dtype=bool)
-    for i in range(0, dataCol.size):
-        regionName = region_id_defaultName[dataCol[i]]
-        if("Surrounding" in regionName):
-            mask[i] = False
-    return mask
+def getProofeditingStatus(): 
+    values = ["non", "clean", "extended"]
+    id_value = {
+        0 : "non",
+        1 : "clean",
+        2 : "extended"
+    }
+    return values, id_value
 
 
 if __name__ == "__main__":
@@ -72,48 +34,65 @@ if __name__ == "__main__":
         printUsageAndExit()
 
     dataFolder = sys.argv[1]
-    rbcFolder = os.path.join(dataFolder, "RBC")
-    neuronsFile = os.path.join(rbcFolder, "neurons.csv")
+    visFolder = os.path.join(dataFolder, "VIS")
+    neuronsFile = os.path.join(visFolder, "somas_extended.csv")
 
-    celltype_values, celltype_id_value = getCelltypes(os.path.join(rbcFolder, "cell_types.csv"))
-    region_id_defaultName, column_values, region_id_column_value, subregion_values, region_id_subregion_value = getRegions(os.path.join(rbcFolder, "regions.csv"))
-    
     headerCols = util.getHeaderCols(neuronsFile)    
+    print(headerCols)
     def getColIdx(name):
         return headerCols.index(name)
 
     neurons = np.loadtxt(neuronsFile, skiprows=1, delimiter=",")
-    mask_inside = getFilterMaskInside(neurons[:,headerCols.index("region")], region_id_defaultName)
-    neurons = neurons[mask_inside, :]
 
-    INVALID_LOC = 99999
+    # convert soma position from nanometer to microns
+    neurons[:,getColIdx("soma_x")] *= 0.001
+    neurons[:,getColIdx("soma_y")] *= 0.001
+    neurons[:,getColIdx("soma_z")] *= 0.001
 
-    # set x, y, z for VPM neurons
-    mask_vpm = neurons[:,headerCols.index("cell_type")] ==  10
-    neurons[mask_vpm,headerCols.index("soma_x")] = INVALID_LOC
-    neurons[mask_vpm,headerCols.index("soma_y")] = INVALID_LOC
-    neurons[mask_vpm,headerCols.index("soma_z")] = INVALID_LOC
-
-    bins_cell_type = util.binCategoricalAttributes(neurons[:,getColIdx("cell_type")], celltype_values, celltype_id_value)
-    util.writeBins(rbcFolder, "cell_type", bins_cell_type)
-
-    bins_cortical_column = util.binCategoricalAttributes(neurons[:,getColIdx("region")], column_values, region_id_column_value)
-    util.writeBins(rbcFolder, "cortical_column", bins_cortical_column)
-
-    bins_subregion = util.binCategoricalAttributes(neurons[:,getColIdx("region")], subregion_values, region_id_subregion_value)
-    util.writeBins(rbcFolder, "subregion", bins_subregion)    
-    
     print("ranges")
-    util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")], INVALID_LOC)
-    util.printDataRange("soma_y", neurons[:,getColIdx("soma_y")], INVALID_LOC)
-    util.printDataRange("soma_z", neurons[:,getColIdx("soma_z")], INVALID_LOC)
-    util.printDataRange("cortical_depth", neurons[:,getColIdx("cortical_depth")], -1)
+    util.printDataRangeCategorical("celltype", neurons[:,getColIdx("celltype")]) 
+    util.printDataRangeCategorical("dendrite_proofediting", neurons[:,getColIdx("dendrite_proofediting")]) 
+    util.printDataRangeCategorical("axon_proofediting", neurons[:,getColIdx("axon_proofediting")]) 
+    util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")])
+    util.printDataRange("soma_y", neurons[:,getColIdx("soma_y")])
+    util.printDataRange("soma_z", neurons[:,getColIdx("soma_z")])
+    util.printDataRange("incoming_synapses_classified", neurons[:,getColIdx("incoming_synapses_classified")])
+    util.printDataRange("outgoing_synapses_classified", neurons[:,getColIdx("outgoing_synapses_classified")])
+    util.printDataRange("incoming_synapses_pre_or_post_classified", neurons[:,getColIdx("incoming_synapses_pre_or_post_classified")])
+    util.printDataRange("outgoing_synapses_pre_or_post_classified", neurons[:,getColIdx("outgoing_synapses_pre_or_post_classified")])
 
-    bins_soma_x = util.binNumericAttributes(neurons[:,getColIdx("soma_x")], -1100, 1300, 100)
-    util.writeBins(rbcFolder, "soma_x", bins_soma_x)
-    bins_soma_y = util.binNumericAttributes(neurons[:,getColIdx("soma_y")], -800, 1400, 100)
-    util.writeBins(rbcFolder, "soma_y", bins_soma_y)
-    bins_soma_z = util.binNumericAttributes(neurons[:,getColIdx("soma_z")], -1500, 600, 100)
-    util.writeBins(rbcFolder, "soma_z", bins_soma_z)
-    bins_cortical_depth = util.binNumericAttributes(neurons[:,getColIdx("cortical_depth")], 0, 2100, 100)
-    util.writeBins(rbcFolder, "cortical_depth", bins_cortical_depth)
+    selection_properities = []    
+
+    celltype_values, celltype_id_value = getCelltypes()    
+    bins_cell_type = util.binCategoricalAttributes(neurons[:,getColIdx("celltype")], celltype_values, celltype_id_value)
+    util.writeBins(visFolder, "cell_type", bins_cell_type, "cell type", selection_properities)
+
+    proofediting_values, proofediting_id_value = getProofeditingStatus()    
+    bins_proofediting_dendrite = util.binCategoricalAttributes(neurons[:,getColIdx("dendrite_proofediting")], proofediting_values, proofediting_id_value)
+    util.writeBins(visFolder, "dendrite_proofediting", bins_proofediting_dendrite, "dendrite proofediting", selection_properities)
+    bins_proofediting_axon = util.binCategoricalAttributes(neurons[:,getColIdx("axon_proofediting")], proofediting_values, proofediting_id_value)
+    util.writeBins(visFolder, "axon_proofediting", bins_proofediting_axon, "axon proofediting", selection_properities)
+
+    bins_soma_x = util.binNumericAttributes(neurons[:,getColIdx("soma_x")], 200, 1600, 100)
+    util.writeBins(visFolder, "soma_x", bins_soma_x, "soma x-coord", selection_properities)
+    bins_soma_y = util.binNumericAttributes(neurons[:,getColIdx("soma_y")], 200, 1100, 100)
+    util.writeBins(visFolder, "soma_y", bins_soma_y, "soma y-coord", selection_properities)
+    bins_soma_z = util.binNumericAttributes(neurons[:,getColIdx("soma_z")], 500, 1100, 100)
+    util.writeBins(visFolder, "soma_z", bins_soma_z, "soma z-coord", selection_properities)
+    bins_incoming_classified = util.binNumericAttributes(neurons[:,getColIdx("incoming_synapses_classified")], 0, 60, 5)
+    util.writeBins(visFolder, "incoming_classified", bins_incoming_classified, "incoming syn.", selection_properities)
+    bins_outgoing_classified = util.binNumericAttributes(neurons[:,getColIdx("outgoing_synapses_classified")], 0, 40, 5)
+    util.writeBins(visFolder, "outgoing_classified", bins_outgoing_classified, "outgoing syn.", selection_properities)
+    bins_incoming_all = util.binNumericAttributes(neurons[:,getColIdx("incoming_synapses_pre_or_post_classified")], 0, 50000, 2000)
+    util.writeBins(visFolder, "incoming_all", bins_incoming_all, "incoming syn. (all)", selection_properities)
+    bins_outgoing_all = util.binNumericAttributes(neurons[:,getColIdx("outgoing_synapses_pre_or_post_classified")], 0, 8000, 500)
+    util.writeBins(visFolder, "outgoing_all", bins_outgoing_all, "outgoing syn. (all)", selection_properities)
+
+    meta = {
+        "selection_properties" : selection_properities
+    }
+    with open(os.path.join(dataFolder, "VIS.json"),"w") as f:
+        json.dump(meta, f)
+    
+
+   

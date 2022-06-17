@@ -22,3 +22,15 @@ cd server
 conda activate matrix-server
 python matrix_compute_server.py <path-to-dataset>
 ```
+
+## Preprocesing data
+
+```
+cd server
+python preprocess_RBC.py server/data
+```
+
+```
+cd server
+python preprocess_VIS.py server/data
+```

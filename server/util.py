@@ -34,6 +34,11 @@ def printDataRange(name, dataColumn, invalidValue = None):
     print(name, np.min(dataColumn[filterMask]), np.max(dataColumn[filterMask]))
 
 
+def printDataRangeCategorical(name, dataColumn):
+    uniqueValues = np.unique(dataColumn)
+    print(name, uniqueValues)
+
+
 def assertMaskConsistency(dataColumn, bins):
     count = 0
     for bin in bins:
@@ -41,7 +46,7 @@ def assertMaskConsistency(dataColumn, bins):
     assert count == dataColumn.size
 
 
-def writeBins(baseFolder, propertyName, bins):
+def writeBins(baseFolder, propertyName, bins, displayName=None, selectionProperties = None):
     targetFolder = os.path.join(baseFolder, propertyName)
     makeCleanDir(targetFolder)
     values = []
@@ -53,9 +58,13 @@ def writeBins(baseFolder, propertyName, bins):
         "name" : propertyName,
         "values" : values,
     }
+    if(displayName is not None):
+        meta["display_name"] = displayName
     metaFile = os.path.join(targetFolder, "meta.json")
     with open(metaFile, "w") as f:
         json.dump(meta, f)
+    if(selectionProperties is not None):
+        selectionProperties.append(meta)
     
 
 def binCategoricalAttributes(dataColumn, values, valueId_value):
