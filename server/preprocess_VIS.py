@@ -28,7 +28,6 @@ def getProofeditingStatus():
     }
     return values, id_value
 
-
 if __name__ == "__main__":
     if(len(sys.argv) != 2):
         printUsageAndExit()
@@ -79,13 +78,21 @@ if __name__ == "__main__":
     util.writeBins(visFolder, "soma_y", bins_soma_y, "soma y-coord", selection_properities)
     bins_soma_z = util.binNumericAttributes(neurons[:,getColIdx("soma_z")], 500, 1100, 100)
     util.writeBins(visFolder, "soma_z", bins_soma_z, "soma z-coord", selection_properities)
-    bins_incoming_classified = util.binNumericAttributes(neurons[:,getColIdx("incoming_synapses_classified")], 0, 60, 5)
+
+    bin_bounds = [(-1,0)] + util.getBinBounds(0,20,1) + [(20,100)]
+    bins_incoming_classified = util.binNumericAttributesFixedBins(neurons[:,getColIdx("incoming_synapses_classified")], bin_bounds)        
     util.writeBins(visFolder, "incoming_classified", bins_incoming_classified, "incoming syn.", selection_properities)
-    bins_outgoing_classified = util.binNumericAttributes(neurons[:,getColIdx("outgoing_synapses_classified")], 0, 40, 5)
+
+    bin_bounds = [(-1,0)] + util.getBinBounds(0,20,1) + [(20,100)]
+    bins_outgoing_classified = util.binNumericAttributesFixedBins(neurons[:,getColIdx("outgoing_synapses_classified")], bin_bounds)
     util.writeBins(visFolder, "outgoing_classified", bins_outgoing_classified, "outgoing syn.", selection_properities)
-    bins_incoming_all = util.binNumericAttributes(neurons[:,getColIdx("incoming_synapses_pre_or_post_classified")], 0, 50000, 2000)
+
+    bin_bounds = [(-1,0)] + util.getBinBounds(0,20,1) + [(20,50), (50,100), (100,200), (200,500), (500,1000), (1000,2000), (2000,5000), (5000,10000)] 
+    bins_incoming_all = util.binNumericAttributesFixedBins(neurons[:,getColIdx("incoming_synapses_pre_or_post_classified")], bin_bounds)
     util.writeBins(visFolder, "incoming_all", bins_incoming_all, "incoming syn. (all)", selection_properities)
-    bins_outgoing_all = util.binNumericAttributes(neurons[:,getColIdx("outgoing_synapses_pre_or_post_classified")], 0, 8000, 500)
+
+    bin_bounds = [(-1,0)] + util.getBinBounds(0,20,1) + [(20,50), (50,100), (100,200), (200,500), (500,1000), (1000,2000), (2000,5000), (5000,10000)] 
+    bins_outgoing_all = util.binNumericAttributesFixedBins(neurons[:,getColIdx("outgoing_synapses_pre_or_post_classified")], bin_bounds)
     util.writeBins(visFolder, "outgoing_all", bins_outgoing_all, "outgoing syn. (all)", selection_properities)
 
     meta = {

@@ -111,5 +111,33 @@ def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step
     return bins
 
 
+def getBinBounds(startValue, numBins, step):
+    bounds = []
+    for i in range(0,numBins):
+        a = startValue + i * step
+        b = a + step
+        bounds.append((a,b))
+    return bounds
+
+
+def binNumericAttributesFixedBins(dataColumn, binBounds):
+    # (a,b] start exclusive, end inclusive
+    bins = []     
+    mask_binned = np.zeros(dataColumn.size, dtype=bool)
+    for binBound in binBounds:               
+        mask_current = (dataColumn > binBound[0]) & (dataColumn <= binBound[1])
+        mask_binned |= mask_current        
+        bins.append({
+            "value" : "{}".format(binBound[1]),
+            "mask" : mask_current            
+        })
+    bins.append({
+        "value" : "other",
+        "mask" : ~mask_binned
+    })
+
+    assertMaskConsistency(dataColumn, bins)
+    return bins
+
 
     
