@@ -57,6 +57,7 @@ def writeBins(baseFolder, propertyName, bins, displayName=None, selectionPropert
     meta = {
         "name" : propertyName,
         "values" : values,
+        "property_type" : "categorical"
     }
     if(displayName is not None):
         meta["display_name"] = displayName

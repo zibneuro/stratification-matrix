@@ -3,7 +3,11 @@
         {
             "name" : "RBC",
             "display_name" : "rat barrel cortex"                        
+        },
+        {
+            "name" : "VIS",
+            "display_name" : "mouse visual cortex"                        
         }
     ],
-    "default_profile": "RBC"
+    "default_profile": "VIS"
 }

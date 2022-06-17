@@ -112,8 +112,10 @@ if __name__ == "__main__":
     dataFolder = sys.argv[1]
    
     processors = {}
-    processors["RBC"] = QueryProcessor(dataFolder, "RBC")
-    processors["RBC"].loadMasks()
+    #processors["RBC"] = QueryProcessor(dataFolder, "RBC")
+    #processors["RBC"].loadMasks()
+    processors["VIS"] = QueryProcessor(dataFolder, "VIS")
+    processors["VIS"].loadMasks()
 
     """
     testRequest = {
