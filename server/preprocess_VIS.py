@@ -5,7 +5,7 @@ import numpy as np
 import util 
 
 def printUsageAndExit():
-    print("python preprocess_RBC.py <data-folder>")    
+    print("python preprocess_VIS.py <data-folder>")    
     exit()
 
 
@@ -86,13 +86,13 @@ if __name__ == "__main__":
     mask_inside = getFilterMaskInside(neurons[:,headerCols.index("region")], region_id_defaultName)
     neurons = neurons[mask_inside, :]
 
-    INVALID_POS = 99999
+    INVALID_LOC = 99999
 
-    # set soma x,y,z for VPM neurons
-    mask_vpm = neurons[:,headerCols.index("cell_type")] == 10
-    neurons[mask_vpm,headerCols.index("soma_x")] = INVALID_POS = 99999
-    neurons[mask_vpm,headerCols.index("soma_y")] = INVALID_POS = 99999
-    neurons[mask_vpm,headerCols.index("soma_z")] = INVALID_POS = 99999
+    # set x, y, z for VPM neurons
+    mask_vpm = neurons[:,headerCols.index("cell_type")] ==  10
+    neurons[mask_vpm,headerCols.index("soma_x")] = INVALID_LOC
+    neurons[mask_vpm,headerCols.index("soma_y")] = INVALID_LOC
+    neurons[mask_vpm,headerCols.index("soma_z")] = INVALID_LOC
 
     bins_cell_type = util.binCategoricalAttributes(neurons[:,getColIdx("cell_type")], celltype_values, celltype_id_value)
     util.writeBins(rbcFolder, "cell_type", bins_cell_type)
@@ -104,9 +104,9 @@ if __name__ == "__main__":
     util.writeBins(rbcFolder, "subregion", bins_subregion)    
     
     print("ranges")
-    util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")], INVALID_POS)
-    util.printDataRange("soma_y", neurons[:,getColIdx("soma_y")], INVALID_POS)
-    util.printDataRange("soma_z", neurons[:,getColIdx("soma_z")], INVALID_POS)
+    util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")], INVALID_LOC)
+    util.printDataRange("soma_y", neurons[:,getColIdx("soma_y")], INVALID_LOC)
+    util.printDataRange("soma_z", neurons[:,getColIdx("soma_z")], INVALID_LOC)
     util.printDataRange("cortical_depth", neurons[:,getColIdx("cortical_depth")], -1)
 
     bins_soma_x = util.binNumericAttributes(neurons[:,getColIdx("soma_x")], -1100, 1300, 100)
