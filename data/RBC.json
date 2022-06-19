@@ -1,4 +1,9 @@
 {
+    "channels": [
+        {
+            "display_name": "neuron counts"
+        }
+    ],
     "selection_properties": [
         {
             "name": "cell_type",

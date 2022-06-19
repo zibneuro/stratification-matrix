@@ -47,6 +47,8 @@ if __name__ == "__main__":
     for profile in profiles:
         profileName = profile["name"]        
         props[profileName] = util.loadJson(os.path.join(dataDir, "{}.json".format(profileName)))
+        props[profileName]["name"] = profile["name"]
+        props[profileName]["display_name"] = profile["display_name"]
     
     app.run(host="localhost", port=5000)
     
