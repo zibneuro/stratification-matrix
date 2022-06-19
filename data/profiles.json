@@ -9,9 +9,9 @@
             "display_name" : "mouse visual cortex"                        
         },
         {
-            "name" : "H01",
-            "display_name" : "human cortex"                        
+            "name" : "H01-synapses",
+            "display_name" : "human cortex (connectivity)"                       
         }
     ],
-    "default_profile": "H01"
+    "default_profile": "H01-synapses"
 }
