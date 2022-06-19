@@ -34,6 +34,10 @@ def printDataRange(name, dataColumn, invalidValue = None):
     print(name, np.min(dataColumn[filterMask]), np.max(dataColumn[filterMask]))
 
 
+def printQuantiles(name, dataVector):
+    print(name,np.quantile(dataVector, [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1]))
+
+
 def printDataRangeCategorical(name, dataColumn):
     uniqueValues = np.unique(dataColumn)
     print(name, uniqueValues)
@@ -70,7 +74,7 @@ def writeBins(baseFolder, propertyName, bins, displayName=None, selectionPropert
 
 def binCategoricalAttributes(dataColumn, values, valueId_value):
     value_mask = {}
-    for value in values:
+    for value in values:        
         value_mask[value] = np.zeros(dataColumn.size, dtype=bool)
 
     for i in range(0, dataColumn.size):
@@ -109,6 +113,17 @@ def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step
 
     assertMaskConsistency(dataColumn, bins)
     return bins
+
+
+def getBinsFromQuantiles(dataVector, numQuantiles):
+    bins = []
+    for k in range(0,numQuantiles):
+        a = np.quantile(dataVector, k / numQuantiles)
+        if(k==0):
+            a -=1 
+        b = np.quantile(dataVector, (k+1) / numQuantiles)
+        bins.append((a,b))
+    return bins 
 
 
 def getBinBounds(startValue, numBins, step):

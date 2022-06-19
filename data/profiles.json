@@ -7,7 +7,11 @@
         {
             "name" : "VIS",
             "display_name" : "mouse visual cortex"                        
+        },
+        {
+            "name" : "H01",
+            "display_name" : "human cortex"                        
         }
     ],
-    "default_profile": "VIS"
+    "default_profile": "H01"
 }
