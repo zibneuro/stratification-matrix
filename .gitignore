@@ -3,4 +3,5 @@ data/RBC
 data/VIS
 data/H01
 data/H01-synapses
+misc/intern
 server/scratch.py
