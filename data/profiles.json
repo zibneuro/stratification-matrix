@@ -1,17 +1,9 @@
 {
     "profiles": [
-        {
-            "name" : "RBC",
-            "display_name" : "rat barrel cortex"                        
-        },
-        {
-            "name" : "VIS",
-            "display_name" : "mouse visual cortex"                        
-        },
-        {
+       {
             "name" : "H01-synapses",
             "display_name" : "human cortex (connectivity)"                       
         }
     ],
-    "default_profile": "RBC"
+    "default_profile": "H01-synapses"
 }

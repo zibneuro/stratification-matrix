@@ -126,19 +126,25 @@ if __name__ == "__main__":
     
     synapsesFile_channel0 = os.path.join(h01BaseFolder, "synapses-classified-neurons.csv")
     synapsesFile_channel1 = os.path.join(h01BaseFolder, "synapses-no-specificity.csv")
-    
+        
     headerCols_channel0 = util.getHeaderCols(synapsesFile_channel0)    
     print(headerCols_channel0)
     def getColIdx_channel0(name):
         return headerCols_channel0.index(name)
-    
+        
     headerCols_channel1 = util.getHeaderCols(synapsesFile_channel1)    
     print(headerCols_channel1)
     def getColIdx_channel1(name):
         return headerCols_channel1.index(name)
-
+    
     synapses_channel0 = np.loadtxt(synapsesFile_channel0, skiprows=1, delimiter=",")
     synapses_channel1 = np.loadtxt(synapsesFile_channel1, skiprows=1, delimiter=",")
+
+    samples_channel0 = synapses_channel0[:,(getColIdx_channel0("pre_id"), getColIdx_channel0("post_id"))].reshape((-1,2))
+    np.savetxt(os.path.join(h01BaseFolder, "samples0"), samples_channel0, fmt="%d")
+    
+    samples_channel1 = synapses_channel1[:,(getColIdx_channel1("pre_id"), getColIdx_channel1("post_id"))].reshape((-1,2))
+    np.savetxt(os.path.join(h01BaseFolder, "samples1"), samples_channel1, fmt="%d")
 
     preIds_channel0 = synapses_channel0[:,getColIdx_channel0("pre_id")].astype(int)
     NAx_channel0 = getNeuronProperties(propertiesFile, preIds_channel0, "NAx")

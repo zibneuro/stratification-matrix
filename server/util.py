@@ -155,4 +155,19 @@ def binNumericAttributesFixedBins(dataColumn, binBounds):
     return bins
 
 
-    
+def getRandomSubset(itemSet, n, sortBeforeShuffle = False):
+    if(n >= len(itemSet)):
+        return itemSet
+
+    array = list(itemSet)
+    if(sortBeforeShuffle):
+        array.sort()
+    np.random.shuffle(array)
+    return set(array[0:n]) 
+
+
+def convertIntFormat(items):
+    converted = []
+    for item in items:
+        converted.append(int(item))
+    return converted

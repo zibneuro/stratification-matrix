@@ -19,10 +19,23 @@ def getTiles():
     if request.method == "POST":
         if request.data:
             data = request.get_json(force=True)
-            #print(">> request Raw", data)
+            #print(">> request raw", data)
             profileName = data["profile"]            
             tiles = processors[profileName].computeTileData(data)            
             return json.dumps(tiles)            
+
+
+@app.route("/matrixComputeServer/getSamples", methods=["GET", "POST"])
+@cross_origin()
+def getSamples():
+    global processors
+    if request.method == "POST":
+        if request.data:
+            data = request.get_json(force=True)
+            #print(">> request raw", data)
+            profileName = data["profile"]            
+            samples = processors[profileName].computeTileData(data, computeSamples=True)            
+            return json.dumps(samples)            
 
 
 @app.route("/matrixComputeServer/test", methods=["GET", "POST"])
