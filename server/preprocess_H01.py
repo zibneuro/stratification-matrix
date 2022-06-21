@@ -19,7 +19,7 @@ def getNeuronProperties(filename, propertyName):
     propertyIdx = {}
     for i in range(0, len(properties["inline"]["properties"])):
         propName = properties["inline"]["properties"][i]["id"]
-        print(i, propName)
+        #print(i, propName)
         propertyIdx[propName] = i
 
     tags_all = properties["inline"]["properties"][propertyIdx["tags"]]["tags"]    
@@ -192,16 +192,6 @@ if __name__ == "__main__":
     bins = util.binTags(dataColumn, otherAnnotation_values, otherAnnotation_id_value, otherAnnotation_na)
     util.writeBins(outfolder_channel0, "other_annotation", bins, "misc. annotation", selection_properties)
 
-    filenameMeta = os.path.join(dataFolder, "H01.json")
-    channels = [
-        {
-            "display_name" : "cell count"
-        }
-    ],
-    util.writeMeta(filenameMeta, selection_properties, channels)
-    
-    np.savetxt(samplesFile, ids, fmt="%d")
-
     """
     1 NVx
     2 NSO
@@ -217,81 +207,34 @@ if __name__ == "__main__":
     12 Sp
     """
 
-
-
-    """
-    samples_channel0 = synapses_channel0[:,(getColIdx_channel0("pre_id"), getColIdx_channel0("post_id"))].reshape((-1,2))
-    np.savetxt(os.path.join(h01BaseFolder, "samples0"), samples_channel0, fmt="%d")
-    
-    samples_channel1 = synapses_channel1[:,(getColIdx_channel1("pre_id"), getColIdx_channel1("post_id"))].reshape((-1,2))
-    np.savetxt(os.path.join(h01BaseFolder, "samples1"), samples_channel1, fmt="%d")
-
-    preIds_channel0 = synapses_channel0[:,getColIdx_channel0("pre_id")].astype(int)
-    NAx_channel0 = getNeuronProperties(propertiesFile, preIds_channel0, "NAx")
-
-    preIds_channel1 = synapses_channel1[:,getColIdx_channel1("pre_id")].astype(int)
-    NAx_channel1 = getNeuronProperties(propertiesFile, preIds_channel1, "NAx")       
-   
-    print("ranges synapses empirical")
-    util.printDataRangeCategorical("pre celltype", synapses_channel0[:,getColIdx_channel0("pre_celltype")]) 
-    util.printDataRangeCategorical("post celltype", synapses_channel0[:,getColIdx_channel0("post_celltype")]) 
-    util.printDataRangeCategorical("pre compartment", synapses_channel0[:,getColIdx_channel0("pre_compartment")]) 
-    util.printDataRangeCategorical("post compartment", synapses_channel0[:,getColIdx_channel0("post_compartment")]) 
-    util.printQuantiles("NAx", NAx_channel0)
-    
-    selection_properities = []    
-
-    # first channel
-    celltype_values, celltype_id_value = getCelltypes()    
-    bins_cell_type_pre = util.binCategoricalAttributes(synapses_channel0[:,getColIdx_channel0("pre_celltype")], celltype_values, celltype_id_value)
-    util.writeBins(outfolder_channel0, "pre_cell_type", bins_cell_type_pre, "pre cell type", selection_properities)
-    bins_cell_type_post = util.binCategoricalAttributes(synapses_channel0[:,getColIdx_channel0("post_celltype")], celltype_values, celltype_id_value)
-    util.writeBins(outfolder_channel0, "post_cell_type", bins_cell_type_post, "post cell type", selection_properities)
-
-    layer_values, layer_id_value = getLayers()    
-    bins_layer_pre = util.binCategoricalAttributes(synapses_channel0[:,getColIdx_channel0("pre_celltype")], layer_values, layer_id_value)
-    util.writeBins(outfolder_channel0, "pre_layer", bins_layer_pre, "pre layer", selection_properities)
-    bins_layer_post = util.binCategoricalAttributes(synapses_channel0[:,getColIdx_channel0("post_celltype")], layer_values, layer_id_value)
-    util.writeBins(outfolder_channel0, "post_layer", bins_layer_post, "post layer", selection_properities)
-
-    compartment_values, compartment_id_value = getCompartment()
-    bins_compartment = util.binCategoricalAttributes(synapses_channel0[:,getColIdx_channel0("post_compartment")], compartment_values, compartment_id_value)
-    util.writeBins(outfolder_channel0, "compartment", bins_compartment, "compartment", selection_properities)
-    
-    bin_bounds_NAx = util.getBinsFromQuantiles(NAx_channel0, 10)
-    bins_NAx = util.binNumericAttributesFixedBins(NAx_channel0, bin_bounds_NAx)
-    util.writeBins(outfolder_channel0, "NAx", bins_NAx, "axon size", selection_properities)
-    
-    # second channel        
-    bins_cell_type_pre = util.binCategoricalAttributes(synapses_channel1[:,getColIdx_channel1("pre_celltype")], celltype_values, celltype_id_value)
-    util.writeBins(outfolder_channel1, "pre_cell_type", bins_cell_type_pre, "pre cell type")
-    bins_cell_type_post = util.binCategoricalAttributes(synapses_channel1[:,getColIdx_channel1("post_celltype")], celltype_values, celltype_id_value)
-    util.writeBins(outfolder_channel1, "post_cell_type", bins_cell_type_post, "post cell type")
-
-    bins_layer_pre = util.binCategoricalAttributes(synapses_channel1[:,getColIdx_channel1("pre_celltype")], layer_values, layer_id_value)
-    util.writeBins(outfolder_channel1, "pre_layer", bins_layer_pre, "pre layer")
-    bins_layer_post = util.binCategoricalAttributes(synapses_channel1[:,getColIdx_channel1("post_celltype")], layer_values, layer_id_value)
-    util.writeBins(outfolder_channel1, "post_layer", bins_layer_post, "post layer")
-
-    compartment_values, compartment_id_value = getCompartment()
-    bins_compartment = util.binCategoricalAttributes(synapses_channel1[:,getColIdx_channel1("post_compartment")], compartment_values, compartment_id_value)
-    util.writeBins(outfolder_channel1, "compartment", bins_compartment, "compartment")
-        
-    bins_NAx = util.binNumericAttributesFixedBins(NAx_channel1, bin_bounds_NAx)
-    util.writeBins(outfolder_channel1, "NAx", bins_NAx, "axon size")
-
-    # write meta
-    meta = {
-        "channels" : [
-            {
-                "display_name" : "synapse counts empirical"
-            },
-            {
-                "display_name" : "synapse counts model"
-            }
-        ],
-        "selection_properties" : selection_properities
+    displayNames = {
+        "NVx" : "volume (NVx)",
+        "NAx" : "axon nodes (NAx)",
+        "NDe" : "dendrite nodes (NDe)",
+        "Sp" : "spinyness (Sp)",
+        "NSO" : "synapses outgoing (NSO)",
+        "NSI" : "synapses incoming (NSI)",
     }
-    with open(os.path.join(dataFolder, "H01-synapses.json"),"w") as f:
-        json.dump(meta, f)
-    """
+    quantiles = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.996,0.998,0.999,1]
+
+    for numericProperty in ["NVx", "NAx", "NDe", "NSO", "NSI"]:
+        _, _, dataNumeric = getNeuronProperties(propertiesFile, numericProperty)        
+        dataNumeric = np.array(dataNumeric)
+
+        if(numericProperty == "Sp"):
+            dataNumeric *=100
+
+        np.savetxt("/tmp/{}".format(numericProperty), dataNumeric)
+        bin_bounds = util.getBinsFromFixedQuantiles(dataNumeric, quantiles)
+        bins = util.binNumericAttributesFixedBins(dataNumeric, bin_bounds)
+        util.writeBins(outfolder_channel0, numericProperty, bins, displayNames[numericProperty], selection_properties)
+
+    filenameMeta = os.path.join(dataFolder, "H01.json")
+    channels = [
+        {
+            "display_name" : "cell count"
+        }
+    ],
+    util.writeMeta(filenameMeta, selection_properties, channels)
+    
+    np.savetxt(samplesFile, ids, fmt="%d")

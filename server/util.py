@@ -155,6 +155,18 @@ def getBinsFromQuantiles(dataVector, numQuantiles):
     return bins 
 
 
+def getBinsFromFixedQuantiles(dataVector, quantiles):
+    bins = []
+    for k in range(0,len(quantiles)):        
+        if(k==0):
+            a =-1
+        else:
+            a = np.quantile(dataVector,quantiles[k-1])
+        b = np.quantile(dataVector, quantiles[k])
+        bins.append((a,b))
+    return bins 
+
+
 def getBinBounds(startValue, numBins, step):
     bounds = []
     for i in range(0,numBins):
@@ -172,7 +184,7 @@ def binNumericAttributesFixedBins(dataColumn, binBounds):
         mask_current = (dataColumn > binBound[0]) & (dataColumn <= binBound[1])
         mask_binned |= mask_current        
         bins.append({
-            "value" : "{}".format(binBound[1]),
+            "value" : "{:.0f}".format(binBound[1]),
             "mask" : mask_current            
         })
     bins.append({
