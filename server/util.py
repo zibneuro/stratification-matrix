@@ -20,10 +20,10 @@ def loadJson(filename):
         return json.load(f)
 
 
-def getHeaderCols(filename):
+def getHeaderCols(filename, delimiter=","):
     with open(filename) as f:
         headerLine = f.readline()
-        return headerLine.rstrip().split(",")
+        return headerLine.rstrip().split(delimiter)
 
 
 def printDataRange(name, dataColumn, invalidValue = None):
@@ -43,11 +43,11 @@ def printDataRangeCategorical(name, dataColumn):
     print(name, uniqueValues)
 
 
-def assertMaskConsistency(dataColumn, bins):
+def assertMaskConsistency(bins, lenDataColumn):
     count = 0
     for bin in bins:
         count += np.count_nonzero(bin["mask"])
-    assert count == dataColumn.size
+    assert count == lenDataColumn
 
 
 def writeBins(baseFolder, propertyName, bins, displayName=None, selectionProperties = None):
@@ -72,12 +72,17 @@ def writeBins(baseFolder, propertyName, bins, displayName=None, selectionPropert
         selectionProperties.append(meta)
     
 
-def binCategoricalAttributes(dataColumn, values, valueId_value):
+def binCategoricalAttributes(dataColumn, values, valueId_value, isArrayData = False):
     value_mask = {}
-    for value in values:        
-        value_mask[value] = np.zeros(dataColumn.size, dtype=bool)
+    if(isArrayData):
+        lenDataColumn = len(dataColumn)
+    else:
+        lenDataColumn = dataColumn.size
 
-    for i in range(0, dataColumn.size):
+    for value in values:            
+        value_mask[value] = np.zeros(lenDataColumn, dtype=bool)
+    
+    for i in range(0, lenDataColumn):
         valueId = dataColumn[i]
         value = valueId_value[valueId]
         value_mask[value][i] = True
@@ -89,7 +94,7 @@ def binCategoricalAttributes(dataColumn, values, valueId_value):
             "mask" : value_mask[value]
         })
 
-    assertMaskConsistency(dataColumn, bins)
+    assertMaskConsistency(bins, lenDataColumn)
     return bins
 
 
@@ -111,7 +116,7 @@ def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step
         "mask" : ~mask_binned
     })
 
-    assertMaskConsistency(dataColumn, bins)
+    assertMaskConsistency(bins, dataColumn.size)
     return bins
 
 
@@ -151,7 +156,7 @@ def binNumericAttributesFixedBins(dataColumn, binBounds):
         "mask" : ~mask_binned
     })
 
-    assertMaskConsistency(dataColumn, bins)
+    assertMaskConsistency(bins, dataColumn.size)
     return bins
 
 
@@ -171,3 +176,12 @@ def convertIntFormat(items):
     for item in items:
         converted.append(int(item))
     return converted
+
+
+def writeMeta(filename, selectionProperties, channels):
+    meta = {
+        "channels" : channels,
+        "selection_properties" : selectionProperties
+    }
+    with open(filename,"w") as f:
+        json.dump(meta, f)

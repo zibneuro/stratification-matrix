@@ -37,7 +37,10 @@ class QueryProcessor:
                     self.property_value_mask[channelIdx][propertyName][propertyValue] = np.loadtxt(maskFile).astype(bool)
                     print("loaded mask {} {}".format(propertyName, propertyValue))
             # load samples
-            self.samples[channelIdx] = np.loadtxt(self.getSamplesFile(channelIdx)).astype(int)
+            samples = np.atleast_2d(np.loadtxt(self.getSamplesFile(channelIdx)).astype(int))            
+            if(samples.shape[0] < samples.shape[1]):
+                samples = samples.reshape(-1,1)
+            self.samples[channelIdx] = samples
 
 
     def computeTileData(self, requestData, computeSamples = False):
@@ -85,6 +88,7 @@ class QueryProcessor:
 
     def getSamples(self, rowMasks, colMasks, requestedTiles, channelIdx):
         samples = set()
+        print("sample format", self.samples[0].shape)
         for requestedTile in requestedTiles:
             mask_row = rowMasks[requestedTile[0]]
             mask_col = colMasks[requestedTile[1]]            
