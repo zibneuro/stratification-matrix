@@ -1,9 +1,9 @@
 {
     "profiles": [
         {
-            "name": "RBC-L5PT",
-            "display_name": "rbc"
+            "name": "COVID",
+            "display_name": "COVID Germany"
         }
     ],
-    "default_profile": "RBC-L5PT"
+    "default_profile": "COVID"
 }

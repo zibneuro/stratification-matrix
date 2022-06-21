@@ -15,6 +15,10 @@ class QueryProcessor:
         profileMetaFile = os.path.join(self.dataFolder, "{}.json".format(profileName))
         self.profileMeta = util.loadJson(profileMetaFile)
         self.numChannels = len(self.profileMeta["channels"])
+        if("options" in self.profileMeta):
+            self.options = self.profileMeta["options"]
+        else:
+            self.options = {}
 
 
     def getMaskFolder(self, channelIdx, propertyName):
@@ -73,6 +77,9 @@ class QueryProcessor:
             if(computeSamples):
                 samples = self.getSamples(rowMasks, colMasks, requestedTiles, channelIdx)
                 result_per_channel.append(samples)
+            elif("samples_are_weights" in self.options):
+                tileData = self.getWeightedCounts(rowMasks, colMasks, requestedTiles, channelIdx)
+                result_per_channel.append(tileData)
             else:
                 tileData = []
                 for mask_row in rowMasks:
@@ -87,8 +94,7 @@ class QueryProcessor:
 
 
     def getSamples(self, rowMasks, colMasks, requestedTiles, channelIdx):
-        samples = set()
-        print("sample format", self.samples[0].shape)
+        samples = set()       
         for requestedTile in requestedTiles:
             mask_row = rowMasks[requestedTile[0]]
             mask_col = colMasks[requestedTile[1]]            
@@ -99,3 +105,14 @@ class QueryProcessor:
         samples_subset_list = list(samples_subset)
         samples_subset_list.sort()        
         return util.convertIntFormat(samples_subset_list)
+
+
+    def getWeightedCounts(self, rowMasks, colMasks, requestedTiles, channelIdx):
+        tileData = []
+        for mask_row in rowMasks:
+            valuesRow = []
+            for mask_col in colMasks:
+                mask_cell = mask_row & mask_col
+                valuesRow.append(int(np.sum(self.samples[channelIdx][mask_cell])))
+            tileData.append(valuesRow)
+        return tileData

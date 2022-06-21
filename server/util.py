@@ -214,10 +214,14 @@ def convertIntFormat(items):
     return converted
 
 
-def writeMeta(filename, selectionProperties, channels):
+def writeMeta(filename, selectionProperties, channels, options = {}):
     meta = {
+        "options" : options,
         "channels" : channels,
         "selection_properties" : selectionProperties
     }
     with open(filename,"w") as f:
         json.dump(meta, f)
+
+def revertDict(dictIn):
+    return dict((v,k) for k,v in dictIn.items())

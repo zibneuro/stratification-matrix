@@ -85,24 +85,23 @@ def getLandIndex():
     - 16 Thüringen (TH)
     """
     return {
-        "Schleswig-Holstein" : 1,
-        "Hamburg" : 2,
-        "Niedersachsen" : 3,
-        "Bremen" : 4,
-        "Nordrhein-Westfalen" : 5,
-        "Hessen" : 6,
-        "Rheinland-Pfalz" : 7,
-        "Baden-Wuerttemberg" : 8,
-        "Bayern" : 9,
-        "Saarland" : 10,
-        "Berlin" : 11,
-        "Brandenburg" : 12,
-        "Mecklenburg-Vorpommern" : 13,
-        "Sachsen" : 14,
-        "Sachsen-Anhalt" : 15,
-        "Thueringen" : 16
+        "SH" : 1,
+        "HH" : 2,
+        "NI" : 3,
+        "HB" : 4,
+        "NW" : 5,
+        "HE" : 6,
+        "RP" : 7,
+        "BW" : 8,
+        "BY" : 9,
+        "SL" : 10,
+        "BE" : 11,
+        "BB" : 12,
+        "MV" : 13,
+        "SN" : 14,
+        "ST" : 15,
+        "TH" : 16
     }
-
 
 
 def aggregateData(filename, filenameAggregated):
@@ -184,7 +183,7 @@ def aggregateData(filename, filenameAggregated):
             anzahlFall = int(parts[getColIdx("AnzahlFall")])                        
             anzahlTodesfall = int(parts[getColIdx("AnzahlTodesfall")])      
 
-            caseKey = (dateId, landId, ageId, genderId)          
+            caseKey = (dateId, ageId, genderId, landId)          
             if(caseKey not in cases):
                 cases[caseKey] = [0, 0]
 
@@ -210,64 +209,50 @@ if __name__ == "__main__":
     util.makeCleanDir(outfolder_channel0)
     util.makeCleanDir(outfolder_channel1)
         
-    samplesFile0 = os.path.join(outfolder_channel0, "samples0")
-    samplesFile1 = os.path.join(outfolder_channel0, "samples1")
-
     dataFile = os.path.join(dataFolder, "COVID", "Aktuell_Deutschland_SarsCov2_Infektionen.csv") # downloaded 2022-06-21
     dataFileAggregated = os.path.join(dataFolder, "COVID", "aggregated.csv")
+
     #aggregateData(dataFile, dataFileAggregated)
-    
-    """
-    ids, _, dataColumn = getNeuronProperties(propertiesFile, "tags")
-    ids = util.convertIntFormat(ids)
-        
+    data = np.loadtxt(dataFileAggregated, skiprows=1, delimiter=",")
+
+    samplesFile0 = os.path.join(baseFolder, "samples0")
+    samplesFile1 = os.path.join(baseFolder, "samples1")
+    np.savetxt(samplesFile0, data[:,4])
+    np.savetxt(samplesFile1, data[:,5])
+
     selection_properties = []
 
-    layer_values, layer_id_value, layer_na = getLayer()
-    bins = util.binTags(dataColumn, layer_values, layer_id_value, layer_na)
-    util.writeBins(outfolder_channel0, "layer", bins, "layer", selection_properties)
+    date_values = sorted(getDateIndex().keys())
+    bins = util.binCategoricalAttributes(data[:,0], date_values, util.revertDict(getDateIndex()))
+    util.writeBins(outfolder_channel0, "date", bins, "year/month", selection_properties)
+    util.writeBins(outfolder_channel1, "date", bins, "year/month")
 
-    celltype_values, celltype_id_value, celltype_na = getCelltype()
-    bins = util.binTags(dataColumn, celltype_values, celltype_id_value, celltype_na)
-    util.writeBins(outfolder_channel0, "cell_type", bins, "cell type", selection_properties)
+    age_values = sorted(getAgeIndex().keys())    
+    bins = util.binCategoricalAttributes(data[:,1], age_values, util.revertDict(getAgeIndex()))
+    util.writeBins(outfolder_channel0, "age", bins, "age group", selection_properties)
+    util.writeBins(outfolder_channel1, "age", bins, "age group")
 
-    neuronAnnotation_values, neuronAnnotation_id_value, neuronAnnotation_na = getNeuronAnnotation()
-    bins = util.binTags(dataColumn, neuronAnnotation_values, neuronAnnotation_id_value, neuronAnnotation_na)
-    util.writeBins(outfolder_channel0, "neuron_annotation", bins, "neuron annotation", selection_properties)
+    gender_values = ["M","W","na"]
+    bins = util.binCategoricalAttributes(data[:,2], gender_values, util.revertDict(getGenderIndex()))
+    util.writeBins(outfolder_channel0, "gender", bins, "gender", selection_properties)
+    util.writeBins(outfolder_channel1, "gender", bins, "gender")
 
-    otherAnnotation_values, otherAnnotation_id_value, otherAnnotation_na = getGlialAnnotation()
-    bins = util.binTags(dataColumn, otherAnnotation_values, otherAnnotation_id_value, otherAnnotation_na)
-    util.writeBins(outfolder_channel0, "other_annotation", bins, "misc. annotation", selection_properties)
+    land_values = sorted(getLandIndex())
+    bins = util.binCategoricalAttributes(data[:,3], land_values, util.revertDict(getLandIndex()))
+    util.writeBins(outfolder_channel0, "land", bins, "state", selection_properties)
+    util.writeBins(outfolder_channel1, "land", bins, "state")
 
-    displayNames = {
-        "NVx" : "volume (NVx)",
-        "NAx" : "axon nodes (NAx)",
-        "NDe" : "dendrite nodes (NDe)",
-        "Sp" : "spinyness (Sp)",
-        "NSO" : "synapses outgoing (NSO)",
-        "NSI" : "synapses incoming (NSI)",
-    }
-    quantiles = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.91,0.92,0.93,0.94,0.95,0.96,0.97,0.98,0.99,0.992,0.994,0.996,0.998,0.999,1]
-
-    for numericProperty in ["NVx", "NAx", "NDe", "NSO", "NSI"]:
-        _, _, dataNumeric = getNeuronProperties(propertiesFile, numericProperty)        
-        dataNumeric = np.array(dataNumeric)
-
-        if(numericProperty == "Sp"):
-            dataNumeric *=100
-
-        np.savetxt("/tmp/{}".format(numericProperty), dataNumeric)
-        bin_bounds = util.getBinsFromFixedQuantiles(dataNumeric, quantiles)
-        bins = util.binNumericAttributesFixedBins(dataNumeric, bin_bounds)
-        util.writeBins(outfolder_channel0, numericProperty, bins, displayNames[numericProperty], selection_properties)
-
-    filenameMeta = os.path.join(dataFolder, "H01.json")
+    filenameMeta = os.path.join(dataFolder, "COVID.json")
     channels = [
         {
-            "display_name" : "cell count"
+            "display_name" : "cases"
+        },
+        {
+            "display_name" : "deaths"
         }
-    ],
-    util.writeMeta(filenameMeta, selection_properties, channels)
+    ]
+    options = {
+        "samples_are_weights" : True
+    }
+    util.writeMeta(filenameMeta, selection_properties, channels, options)    
     
-    np.savetxt(samplesFile, ids, fmt="%d")
-    """
