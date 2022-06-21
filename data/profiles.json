@@ -1,9 +1,9 @@
 {
     "profiles": [
         {
-            "name": "H01",
-            "display_name": "human cortex: cellular composition"
+            "name": "RBC-L5PT",
+            "display_name": "rbc"
         }
     ],
-    "default_profile": "H01"
+    "default_profile": "RBC-L5PT"
 }
