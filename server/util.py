@@ -98,6 +98,30 @@ def binCategoricalAttributes(dataColumn, values, valueId_value, isArrayData = Fa
     return bins
 
 
+def binTags(data, values, id_value, na_id):
+    n = len(data)
+    value_mask = {}
+    for value in values:
+        value_mask[value] = np.zeros(n, dtype=bool)
+    
+    for i in range(0, n):
+        tags = data[i]
+        assigned = False
+        for tag in tags:
+            if(tag in id_value):
+                value_mask[id_value[tag]][i] = True
+                assigned = True
+        if(not assigned):
+            value_mask[id_value[na_id]][i] = True
+
+    bins = []
+    for value in values:
+        bins.append({
+            "value" : value,
+            "mask" : value_mask[value]
+        })
+    return bins  
+
 def binNumericAttributes(dataColumn, firstBinStartValue, lastBinStartValue, step):
     bins = [] 
     currentStartValue = firstBinStartValue

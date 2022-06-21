@@ -11,6 +11,10 @@
         {
             "name" : "H01-synapses",
             "display_name" : "human cortex (connectivity)"                       
+        },
+        {
+            "name": "H01",
+            "display_name": "human cortex: cellular composition"
         }
     ],
     "default_profile": "RBC"
