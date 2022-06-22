@@ -1,6 +1,10 @@
 {
     "profiles": [        
         {
+            "name" : "RBC",
+            "display_name" : "rat barrel cortex: cellular composition"                        
+        },
+        {
             "name" : "RBC-L5PT",
             "display_name" : "rat barrel cortex: synaptic inputs to L5PT cell"                        
         },
@@ -21,5 +25,5 @@
             "display_name": "COVID Germany"
         }                       
     ],
-    "default_profile": "RBC-L5PT"
+    "default_profile": "RBC"
 }
