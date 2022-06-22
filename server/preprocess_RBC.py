@@ -73,7 +73,10 @@ if __name__ == "__main__":
 
     dataFolder = sys.argv[1]
     rbcFolder = os.path.join(dataFolder, "RBC")
+    channel0Folder = os.path.join(rbcFolder, "channel0")
+    util.makeCleanDir(channel0Folder)
     neuronsFile = os.path.join(rbcFolder, "neurons.csv")
+    samplesFile = os.path.join(rbcFolder, "samples0")
 
     celltype_values, celltype_id_value = getCelltypes(os.path.join(rbcFolder, "cell_types.csv"))
     region_id_defaultName, column_values, region_id_column_value, subregion_values, region_id_subregion_value = getRegions(os.path.join(rbcFolder, "regions.csv"))
@@ -94,14 +97,16 @@ if __name__ == "__main__":
     neurons[mask_vpm,headerCols.index("soma_y")] = INVALID_POS = 99999
     neurons[mask_vpm,headerCols.index("soma_z")] = INVALID_POS = 99999
 
+    selection_properties = []
+
     bins_cell_type = util.binCategoricalAttributes(neurons[:,getColIdx("cell_type")], celltype_values, celltype_id_value)
-    util.writeBins(rbcFolder, "cell_type", bins_cell_type)
+    util.writeBins(channel0Folder, "cell_type", bins_cell_type, "cell type", selection_properties)
 
     bins_cortical_column = util.binCategoricalAttributes(neurons[:,getColIdx("region")], column_values, region_id_column_value)
-    util.writeBins(rbcFolder, "cortical_column", bins_cortical_column)
+    util.writeBins(channel0Folder, "cortical_column", bins_cortical_column, "cortical colummn", selection_properties)
 
     bins_subregion = util.binCategoricalAttributes(neurons[:,getColIdx("region")], subregion_values, region_id_subregion_value)
-    util.writeBins(rbcFolder, "subregion", bins_subregion)    
+    util.writeBins(channel0Folder, "subregion", bins_subregion, "subregion", selection_properties)    
     
     print("ranges")
     util.printDataRange("soma_x", neurons[:,getColIdx("soma_x")], INVALID_POS)
@@ -110,10 +115,19 @@ if __name__ == "__main__":
     util.printDataRange("cortical_depth", neurons[:,getColIdx("cortical_depth")], -1)
 
     bins_soma_x = util.binNumericAttributes(neurons[:,getColIdx("soma_x")], -1100, 1300, 100)
-    util.writeBins(rbcFolder, "soma_x", bins_soma_x)
+    util.writeBins(channel0Folder, "soma_x", bins_soma_x, "soma x-coord", selection_properties)
     bins_soma_y = util.binNumericAttributes(neurons[:,getColIdx("soma_y")], -800, 1400, 100)
-    util.writeBins(rbcFolder, "soma_y", bins_soma_y)
+    util.writeBins(channel0Folder, "soma_y", bins_soma_y, "soma y-coord", selection_properties)
     bins_soma_z = util.binNumericAttributes(neurons[:,getColIdx("soma_z")], -1500, 600, 100)
-    util.writeBins(rbcFolder, "soma_z", bins_soma_z)
+    util.writeBins(channel0Folder, "soma_z", bins_soma_z, "soma z-coord", selection_properties)
     bins_cortical_depth = util.binNumericAttributes(neurons[:,getColIdx("cortical_depth")], 0, 2100, 100)
-    util.writeBins(rbcFolder, "cortical_depth", bins_cortical_depth)
+    util.writeBins(channel0Folder, "cortical_depth", bins_cortical_depth, "cortical depth", selection_properties)
+
+    channels = [{
+        "display_name" : "neuron_count",
+    }]
+    metaFile = os.path.join(dataFolder, "RBC.json") 
+    util.writeMeta(metaFile, selection_properties, channels)
+
+    samples = neurons[:,getColIdx("id")]
+    np.savetxt(samplesFile, samples, fmt="%d")
