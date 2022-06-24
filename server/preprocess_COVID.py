@@ -236,6 +236,27 @@ def getLandIndex():
     }
 
 
+def getLandPopulation():
+    return {
+        "SH" : 2922005,
+        "HH" : 1853935,
+        "NI" : 8027031,
+        "HB" : 676463,
+        "NW" : 17924591,
+        "HE" : 6295017,
+        "RP" : 4106485,
+        "BW" : 11124642,
+        "BY" : 13176989,
+        "SL" : 982348,
+        "BE" : 3677472,
+        "BB" : 2537868,
+        "MV" : 1611160,
+        "SN" : 4043002,
+        "ST" : 2169253,
+        "TH" : 2108863
+    }
+
+
 def aggregateData(filename, filenameAggregated):
     with open(filename, encoding='utf-8-sig') as f:
         lines = f.readlines()
