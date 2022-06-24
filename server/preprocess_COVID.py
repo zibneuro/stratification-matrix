@@ -1,6 +1,6 @@
 import sys
 import os
-import json
+import datetime
 import numpy as np
 
 import util 
@@ -10,7 +10,7 @@ def printUsageAndExit():
     print("python preprocess_COVID.py data-folder")
     exit()
 
-
+"""
 def getDateIndex():
     return {
         "2020-01" : 0,
@@ -44,7 +44,139 @@ def getDateIndex():
         "2022-05" : 28,
         "2022-06" : 29
     }
+"""
 
+def getDateIndex():
+    return {
+        "20-01":0,
+        "20-04":1,
+        "20-05":2,
+        "20-06":3,
+        "20-07":4,
+        "20-08":5,
+        "20-09":6,
+        "20-10":7,
+        "20-11":8,
+        "20-12":9,
+        "20-13":10,
+        "20-14":11,
+        "20-15":12,
+        "20-16":13,
+        "20-17":14,
+        "20-18":15,
+        "20-19":16,
+        "20-20":17,
+        "20-21":18,
+        "20-22":19,
+        "20-23":20,
+        "20-24":21,
+        "20-25":22,
+        "20-26":23,
+        "20-27":24,
+        "20-28":25,
+        "20-29":26,
+        "20-30":27,
+        "20-31":28,
+        "20-32":29,
+        "20-33":30,
+        "20-34":31,
+        "20-35":32,
+        "20-36":33,
+        "20-37":34,
+        "20-38":35,
+        "20-39":36,
+        "20-40":37,
+        "20-41":38,
+        "20-42":39,
+        "20-43":40,
+        "20-44":41,
+        "20-45":42,
+        "20-46":43,
+        "20-47":44,
+        "20-48":45,
+        "20-49":46,
+        "20-50":47,
+        "20-51":48,
+        "20-52":49,
+        "20-53":50,
+        "21-01":51,
+        "21-02":52,
+        "21-03":53,
+        "21-04":54,
+        "21-05":55,
+        "21-06":56,
+        "21-07":57,
+        "21-08":58,
+        "21-09":59,
+        "21-10":60,
+        "21-11":61,
+        "21-12":62,
+        "21-13":63,
+        "21-14":64,
+        "21-15":65,
+        "21-16":66,
+        "21-17":67,
+        "21-18":68,
+        "21-19":69,
+        "21-20":70,
+        "21-21":71,
+        "21-22":72,
+        "21-23":73,
+        "21-24":74,
+        "21-25":75,
+        "21-26":76,
+        "21-27":77,
+        "21-28":78,
+        "21-29":79,
+        "21-30":80,
+        "21-31":81,
+        "21-32":82,
+        "21-33":83,
+        "21-34":84,
+        "21-35":85,
+        "21-36":86,
+        "21-37":87,
+        "21-38":88,
+        "21-39":89,
+        "21-40":90,
+        "21-41":91,
+        "21-42":92,
+        "21-43":93,
+        "21-44":94,
+        "21-45":95,
+        "21-46":96,
+        "21-47":97,
+        "21-48":98,
+        "21-49":99,
+        "21-50":100,
+        "21-51":101,
+        "21-52":102,
+        "22-01":103,
+        "22-02":104,
+        "22-03":105,
+        "22-04":106,
+        "22-05":107,
+        "22-06":108,
+        "22-07":109,
+        "22-08":110,
+        "22-09":111,
+        "22-10":112,
+        "22-11":113,
+        "22-12":114,
+        "22-13":115,
+        "22-14":116,
+        "22-15":117,
+        "22-16":118,
+        "22-17":119,
+        "22-18":120,
+        "22-19":121,
+        "22-20":122,
+        "22-21":123,
+        "22-22":124,
+        "22-23":125,
+        "22-24":126,
+        "22-25":127
+    }
 
 def getAgeIndex():
     return {
@@ -121,7 +253,16 @@ def aggregateData(filename, filenameAggregated):
             return headers.index(colName)
 
         def getYearMonth(dateString):
-            return dateString[0:7]
+            return dateString[0:7]            
+
+        def getYearWeek(dateString):            
+            year = int(dateString[0:4])
+            month = int(dateString[5:7])
+            day = int(dateString[8:10])
+            year_week_day = datetime.date(year,month,day).isocalendar()
+            yearString = str(year_week_day[0])[2:4]
+            week = year_week_day[1]
+            return "{}-{:02d}".format(yearString, week)
 
         def getLand(landkreisId):
             return int(landkreisId[:-3])
@@ -130,7 +271,8 @@ def aggregateData(filename, filenameAggregated):
             parts = lines[i].rstrip().split(",")
 
             dateString = parts[getColIdx("Meldedatum")]            
-            allYearMonth.add(getYearMonth(dateString))
+            #allYearMonth.add(getYearMonth(dateString))
+            allYearMonth.add(getYearWeek(dateString))
 
             landkreisId = parts[getColIdx("IdLandkreis")]
             allLand.add(getLand(landkreisId))
@@ -169,7 +311,8 @@ def aggregateData(filename, filenameAggregated):
             parts = lines[i].rstrip().split(",")
 
             dateString = parts[getColIdx("Meldedatum")]            
-            dateId = dateIndex[getYearMonth(dateString)]
+            #dateId = dateIndex[getYearMonth(dateString)]
+            dateId = dateIndex[getYearWeek(dateString)]
 
             landkreisId = parts[getColIdx("IdLandkreis")]
             landId = getLand(landkreisId)
@@ -212,7 +355,7 @@ if __name__ == "__main__":
     dataFile = os.path.join(dataFolder, "COVID", "Aktuell_Deutschland_SarsCov2_Infektionen.csv") # downloaded 2022-06-21
     dataFileAggregated = os.path.join(dataFolder, "COVID", "aggregated.csv")
 
-    #aggregateData(dataFile, dataFileAggregated)
+    aggregateData(dataFile, dataFileAggregated)
     data = np.loadtxt(dataFileAggregated, skiprows=1, delimiter=",")
 
     samplesFile0 = os.path.join(baseFolder, "samples0")
@@ -224,8 +367,8 @@ if __name__ == "__main__":
 
     date_values = sorted(getDateIndex().keys())
     bins = util.binCategoricalAttributes(data[:,0], date_values, util.revertDict(getDateIndex()))
-    util.writeBins(outfolder_channel0, "date", bins, "year/month", selection_properties)
-    util.writeBins(outfolder_channel1, "date", bins, "year/month")
+    util.writeBins(outfolder_channel0, "date", bins, "year/week", selection_properties)
+    util.writeBins(outfolder_channel1, "date", bins, "year/week")
 
     age_values = sorted(getAgeIndex().keys())    
     bins = util.binCategoricalAttributes(data[:,1], age_values, util.revertDict(getAgeIndex()))

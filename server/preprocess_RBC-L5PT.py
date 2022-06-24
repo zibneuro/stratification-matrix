@@ -105,7 +105,7 @@ if __name__ == "__main__":
     bins_synapses_y = util.binNumericAttributes(synapses3D[:,getColIdxSynapses("y")], 50, 650, 50)
     util.writeBins(channel0Folder, "synapse_y", bins_synapses_y, "synapse y-coord", selectionProperties)
 
-    bins_synapses_z = util.binNumericAttributes(synapses3D[:,getColIdxSynapses("z")], -550, 700, 50)    
+    bins_synapses_z = util.binNumericAttributes(synapses3D[:,getColIdxSynapses("z")], -550, 700, 25)    
     util.writeBins(channel0Folder, "synapse_z", bins_synapses_z, "synapse z-coord", selectionProperties)
 
     metaFile = os.path.join(dataFolder, "RBC-L5PT.json")

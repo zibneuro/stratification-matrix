@@ -1,9 +1,0 @@
-{
-    "profiles": [
-        {
-            "name": "COVID",
-            "display_name": "COVID Germany"
-        }
-    ],
-    "default_profile": "COVID"
-}
