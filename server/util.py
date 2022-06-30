@@ -2,6 +2,7 @@ import math
 import os
 import shutil
 import json
+import itertools
 import numpy as np
 
 
@@ -252,3 +253,32 @@ def getDSCFromProb(p, eps = 0.00001):
     if(p == 1):
         p -= eps
     return -math.log(1-p)
+
+
+def getInitializedDict(numValuesPerProperty):
+    expandedValues = []
+    for numValues in numValuesPerProperty:
+        expandedValues.append(list(np.arange(-1,numValues, dtype=int)))
+    emptyDict = {}
+    for idx in itertools.product(*expandedValues):
+        emptyDict[idx] = 0
+    return emptyDict
+
+
+def getPropertyCombinationKeys(numProperties):
+    propertyIndices = np.arange(numProperties)
+    powerSet = list(itertools.chain.from_iterable(itertools.combinations(propertyIndices, r) for r in range(len(propertyIndices)+1)))
+    keysAll = -1 * np.ones((len(powerSet), numProperties))
+    for i in range(0, len(powerSet)):        
+        keysAll[i,powerSet[i]] = 1
+    return keysAll
+
+
+def getIndicesForIncrement(keyCombinations, propertyValues):
+    values = np.array(propertyValues)
+    values += 1
+    indices = np.multiply(values, keyCombinations)
+    indices[indices < 0] = 0
+    indices -= 1
+    return indices
+

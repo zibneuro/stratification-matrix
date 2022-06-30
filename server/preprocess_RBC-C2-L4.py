@@ -86,6 +86,42 @@ def computeRealization(probabilitiesFile, realizationFile, eps = 0.00001):
     np.savetxt(realizationFile, synapses, fmt="%d")    
 
 
+def getCelltypes(ids_celltype):   
+    values_celltype = ["L3PY", "L4PY", "L4sp", "L4ss", "INH", "VPM"]
+    celltypeIdsMapped = {
+        1 : 0,
+        2 : 1,
+        3 : 2,
+        4 : 3,
+        11 : 4,
+        10 : 5
+    }
+    neuronId_celltypeId = {}
+    for i in range(0, ids_celltype.shape[0]):
+        neuronId = ids_celltype[i,0]
+        celltypeId = ids_celltype[i,1]
+        neuronId_celltypeId[neuronId] = celltypeIdsMapped[celltypeId]
+    return values_celltype, neuronId_celltypeId
+
+
+def getValuesQuantiles(quantilesFile):
+    quantiles = np.loadtxt(quantilesFile)    
+    quantilesText = ["other"]
+    for quantile in quantiles:
+        quantilesText.append("{:.1f}".format(quantile))
+    return quantilesText 
+
+
+def getValuesSynapsesPerConnection(maxClusterSize):
+    values_synapse_count = []
+    for k in range(maxClusterSize + 1):
+        if(k == maxClusterSize):
+            values_synapse_count.append(">={}".format(k))    
+        else:
+            values_synapse_count.append(str(k))    
+    return values_synapse_count
+
+
 if __name__ == "__main__":
     if(len(sys.argv) != 2):
         printUsageAndExit()
@@ -113,7 +149,69 @@ if __name__ == "__main__":
     realizationFile = os.path.join(baseFolder, "realization")
     #computeRealization(probabilitiesFile, realizationFile)
 
-    
+    values_celltype, neuronId_celltypeId = getCelltypes(ids_celltype)    
+    values_intersomatic = getValuesQuantiles(quantilesFile)
+    maxSynapsesPerConnection = 10
+    values_synapse_count = getValuesSynapsesPerConnection(maxSynapsesPerConnection)
+    values_connected = ["connected", "unconnected"]
+
+    channel1 = util.getInitializedDict([
+        len(values_celltype),
+        len(values_celltype),
+        len(values_connected),
+        len(values_synapse_count),
+        len(values_intersomatic)
+    ])
+        
+    channel1File = os.path.join(baseFolder, "channel1.csv")
+    with open(channel1File, "w") as f:
+        f.write("celltype_pre,celltype_post,connected_unconnected,synapse_count,intersomatic_distance,aggregated_count\n")
+        for valueKey, aggregatedCount in channel1.items():
+            f.write("{},{},{},{},{},{}\n".format(*valueKey, aggregatedCount))
+
+
+    filenameMeta = os.path.join(dataFolder, "RBC-C2-L4.json")
+    channels = [
+        {
+            "display_name" : "neuron pairs"
+        }
+    ]
+    selection_properties = [
+        {
+            "name" : "celltype_pre",
+            "property_type" : "categorical", 
+            "display_name" : "presynaptic cell type",
+            "values" : values_celltype
+        },
+        {
+            "name" : "celltype_post",
+            "property_type" : "categorical", 
+            "display_name" : "postsynaptic cell type",
+            "values" : values_celltype
+        },
+        {
+            "name" : "connected_unconnected",
+            "property_type" : "categorical", 
+            "display_name" : "connected/unconnected",
+            "values" : values_connected
+        },
+        {
+            "name" : "synapse_count",
+            "property_type" : "categorical", 
+            "display_name" : "synapse count",
+            "values" : values_synapse_count
+        },
+        {
+            "name" : "intersomatic_distance",
+            "property_type" : "categorical", 
+            "display_name" : "intersomatic distance",
+            "values" : values_intersomatic
+        }
+    ]
+    options = {
+        "aggregated_by_property_values" : True
+    }
+    util.writeMeta(filenameMeta, selection_properties, channels, options)    
     
     
 
