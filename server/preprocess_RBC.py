@@ -124,7 +124,7 @@ if __name__ == "__main__":
     util.writeBins(channel0Folder, "cortical_depth", bins_cortical_depth, "cortical depth", selection_properties)
 
     channels = [{
-        "display_name" : "neuron_count",
+        "display_name" : "neuron count",
     }]
     metaFile = os.path.join(dataFolder, "RBC.json") 
     util.writeMeta(metaFile, selection_properties, channels)

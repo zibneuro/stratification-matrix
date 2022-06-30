@@ -1,3 +1,4 @@
+import math
 import os
 import shutil
 import json
@@ -196,6 +197,19 @@ def binNumericAttributesFixedBins(dataColumn, binBounds):
     return bins
 
 
+def getQuantileIndicesForDataVector(dataVector, invalidValues, quantiles):
+    quantileIndices = np.zeros(dataVector.size, dtype=int)
+    for i in range(0, dataVector.size):       
+        value = dataVector[i]
+        if(value not in invalidValues):
+            for k in range(0, quantiles.size):
+                if (value <= quantiles[k]):
+                    quantileIndices[i] = k + 1
+                    break
+    return quantileIndices
+
+
+
 def getRandomSubset(itemSet, n, sortBeforeShuffle = False):
     if(n >= len(itemSet)):
         return itemSet
@@ -225,3 +239,16 @@ def writeMeta(filename, selectionProperties, channels, options = {}):
 
 def revertDict(dictIn):
     return dict((v,k) for k,v in dictIn.items())
+
+
+def getQuantileSteps(step = 0.1):
+    numSteps = 1/step
+    if(not numSteps.is_integer()):
+        raise ValueError(step)
+    return np.arange(1,numSteps+1) / numSteps
+
+
+def getDSCFromProb(p, eps = 0.00001):
+    if(p == 1):
+        p -= eps
+    return -math.log(1-p)

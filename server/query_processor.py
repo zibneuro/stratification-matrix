@@ -8,7 +8,7 @@ class QueryProcessor:
     def __init__(self, dataFolder, profileName):
         self.dataFolder = dataFolder
         self.profileName = profileName        
-        self.property_value_mask = [{},{}] # per channel
+        self.property_value_mask = [{}, {}] # per channel
         self.samples = [None, None]
         self.maxSamples = 1000
 
