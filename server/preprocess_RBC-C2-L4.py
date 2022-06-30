@@ -122,6 +122,19 @@ def getValuesSynapsesPerConnection(maxClusterSize):
     return values_synapse_count
 
 
+def loadIntersomaticDistanceDict(filename):
+    distancesBinned  = np.loadtxt(filename)
+    distanceDict = {}
+    for i in range(0, distancesBinned.shape[0]):
+        a = distancesBinned[i,0]
+        b = distancesBinned[i,1]
+        dist = distancesBinned[i,2]
+        distanceDict[(a,b)] = dist
+        distanceDict[(b,a)] = dist
+    return distanceDict
+
+
+
 if __name__ == "__main__":
     if(len(sys.argv) != 2):
         printUsageAndExit()
@@ -155,18 +168,63 @@ if __name__ == "__main__":
     values_synapse_count = getValuesSynapsesPerConnection(maxSynapsesPerConnection)
     values_connected = ["connected", "unconnected"]
 
-    channel1 = util.getInitializedDict([
+    channel0 = util.getInitializedDict([
         len(values_celltype),
         len(values_celltype),
         len(values_connected),
         len(values_synapse_count),
         len(values_intersomatic)
     ])
+
+    # map realization to property values
+    data_preId_postId = np.loadtxt(probabilitiesFile, skiprows=1, delimiter=",", usecols=(0,1)).astype(int)
+    data_synapses = np.loadtxt(realizationFile).astype(int)
+
+    assert data_preId_postId.shape[0] == data_synapses.size
+
+    def getConnectedUnconnectedValue(synapseCount):
+        if(synapseCount == 0):
+            return 1
+        else:
+            return 0
+
+    def getSynapseCountBin(synapseCount):
+        if(synapseCount < maxSynapsesPerConnection):
+            return synapseCount
+        else:
+            return maxSynapsesPerConnection
+
+    distanceDict = loadIntersomaticDistanceDict(distancesBinnedFile)
+
+    def getDistanceBin(preId, postId):
+        if(preId == postId):
+            return -1
+        else:
+            return distanceDict[(preId, postId)] 
+
+    keyCombinations = util.getPropertyCombinationKeys(5)
+
+    for i in range(0, data_preId_postId.shape[0]):
+        if(i % 1000):
+            print(i)
+        preId = data_preId_postId[i,0]
+        preCelltypeId = neuronId_celltypeId[preId]
+        postId = data_preId_postId[i,1]
+        postCelltypeId = neuronId_celltypeId[postId]
+        synapseCount = data_synapses[i]
+        connectedUconnected = getConnectedUnconnectedValue(synapseCount)
+        synapseCountBin = getSynapseCountBin(synapseCount)
+        distanceBin = getDistanceBin(preId, postId)
+
+        propValues = [preCelltypeId, postCelltypeId, connectedUconnected, synapseCountBin, distanceBin]
+        indicesForIncrement = util.getIndicesForIncrement(keyCombinations, propValues)
+        for k in range(0,indicesForIncrement.shape[0]):            
+            channel0[tuple(indicesForIncrement[k,:])] += 1
         
-    channel1File = os.path.join(baseFolder, "channel1.csv")
-    with open(channel1File, "w") as f:
+    channel0File = os.path.join(baseFolder, "channel0.csv")
+    with open(channel0File, "w") as f:
         f.write("celltype_pre,celltype_post,connected_unconnected,synapse_count,intersomatic_distance,aggregated_count\n")
-        for valueKey, aggregatedCount in channel1.items():
+        for valueKey, aggregatedCount in channel0.items():
             f.write("{},{},{},{},{},{}\n".format(*valueKey, aggregatedCount))
 
 
