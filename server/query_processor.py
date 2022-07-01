@@ -201,7 +201,7 @@ class QueryProcessor:
                 if(valueKey is None):
                     nextRow.append(0)                    
                 else:                
-                    nextRow.append(valueKey_aggregatedCount[valueKey])                    
+                    nextRow.append(int(valueKey_aggregatedCount[valueKey]))
             tileData.append(nextRow)
 
         return tileData

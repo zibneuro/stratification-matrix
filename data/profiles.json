@@ -1,9 +1,34 @@
 {
-    "profiles": [        
-        {
-            "name" : "RBC-C2-L4",
-            "display_name" : "rat barrel cortex: connectivity in C2 barrel"                        
-        }           
+    
+        "profiles": [        
+            {
+                "name" : "RBC",
+                "display_name" : "rat barrel cortex: cellular composition"                        
+            },
+            {
+                "name" : "RBC-L5PT",
+                "display_name" : "rat barrel cortex: synaptic inputs to one L5PT cell"                        
+            },
+            {
+                "name": "RBC-C2-L4",
+                "display_name": "rat barrel cortex: synaptic connectivity in layer 4, C2"
+            },     
+            {
+                "name": "H01",
+                "display_name": "human temporal cortex: cellular composition"
+            },                
+            {
+                "name" : "H01-synapses",
+                "display_name" : "human temporal cortex: synaptic connectivity"                       
+            },        
+            {
+                "name" : "VIS",
+                "display_name" : "mouse visual cortex: proofediting state"                        
+            },
+            {
+                "name": "COVID",
+                "display_name": "COVID Germany"
+            }                                           
     ],
-    "default_profile": "RBC-C2-L4"
+    "default_profile": "RBC"
 }
