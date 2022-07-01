@@ -1,8 +1,6 @@
-from re import L
 import sys
 import os
 import json
-from types import CellType
 import numpy as np
 
 import util 
