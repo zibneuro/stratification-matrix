@@ -1,36 +1,13 @@
-# stratification-matrix
-A generic stratification matrix for neural network analysis.
+## About
+A stratification matrix viewer for analysis of neural network data.
 
-Install matrix-server python environment
+![teaser-image](teaser-image.png)
 
-```
-conda env create --file matrix-server.yml
-conda activate matrix-server
-pip install flask-cors
-```
+Online version of tool: https://cortexinsilico.zib.de/matrix
 
-Start matrix server
-```
-cd server
-conda activate matrix-server
-python matrix_server.py ../data
-```
+Also refer to [supplementary video](https://cortexinsilico.zib.de/videoShortComplete).
 
-Start matrix compute server
-```
-cd server
-conda activate matrix-server
-python matrix_compute_server.py <path-to-dataset>
-```
-
-## Preprocesing data
-
-```
-cd server
-python preprocess_RBC.py server/data
-```
-
-```
-cd server
-python preprocess_VIS.py server/data
-```
+### Cite as
+A Stratification Matrix Viewer for Analysis of Neural Network Data (Short paper).
+Philipp Harth, Sumit Kumar Vohra, Daniel Udvary, Marcel Oberlaender, Hans-Christian Hege, Daniel Baum
+<i>Eurographics Workshop on Visual Computing for Biology and Medicine (VCBM)</i>, 2022.

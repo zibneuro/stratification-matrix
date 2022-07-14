@@ -4,7 +4,8 @@ import shutil
 import json
 import itertools
 import numpy as np
-
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 def makeCleanDir(dirname):
     if(os.path.exists(dirname)):
@@ -97,6 +98,28 @@ def binCategoricalAttributes(dataColumn, values, valueId_value, isArrayData = Fa
         })
 
     assertMaskConsistency(bins, lenDataColumn)
+    return bins
+
+
+def binIntegerValuedAttributes(dataColumn):
+    values = np.unique(dataColumn)
+    
+    value_mask = {}
+    for value in values:
+        value_mask[str(value)] = np.zeros(dataColumn.size, dtype=bool)
+
+    for i in range(0, dataColumn.size):
+        valueStr = str(dataColumn[i])
+        value_mask[valueStr][i] = True
+    
+    bins = []
+    for value in values:
+        bins.append({
+            "value" : "{:d}".format(int(value)),
+            "mask" : value_mask[str(value)]
+        })
+
+    assertMaskConsistency(bins, dataColumn.size)
     return bins
 
 
@@ -200,7 +223,7 @@ def binNumericAttributesFixedBins(dataColumn, binBounds):
 
 def getQuantileIndicesForDataVector(dataVector, invalidValues, quantiles):
     quantileIndices = np.zeros(dataVector.size, dtype=int)
-    for i in range(0, dataVector.size):       
+    for i in range(0, dataVector.size):               
         value = dataVector[i]
         if(value not in invalidValues):
             for k in range(0, quantiles.size):
@@ -256,6 +279,12 @@ def getDSCFromProb(p, eps = 0.00001):
 
 
 def getInitializedDict(numValuesPerProperty):
+    """
+    Returns dictionary with all possible value combinations
+    of the properties (-1: wildcard/property not used). Every
+    value combination is initialized with count 0. For example:
+    (1,2,-1,1,7) -> 0
+    """
     expandedValues = []
     for numValues in numValuesPerProperty:
         expandedValues.append(list(np.arange(-1,numValues, dtype=int)))
@@ -282,3 +311,124 @@ def getIndicesForIncrement(keyCombinations, propertyValues):
     indices -= 1
     return indices
 
+
+def getQuantilesForDataVector(dataVector, propertyName, outFolderPlot, quantileStep, numBins=50):
+    
+    quantileSteps = getQuantileSteps(quantileStep)
+    print("quantile steps", quantileSteps)
+    quantiles = np.quantile(dataVector, quantileSteps)
+    print("quantiles", quantiles)
+    
+    mpl.rcParams["font.size"] = 8
+
+    plt.clf()
+    fig = plt.figure(figsize=(7,4))
+    ax1 = fig.add_subplot(111)
+    ax2 = ax1.twiny()
+
+    _ = ax1.hist(dataVector, bins=numBins)
+    for quantile in quantiles:
+        ax1.axvline(x=quantile, color="black", linewidth=1)
+
+    xmin = np.min(dataVector)
+    xmax = np.max(dataVector)    
+    
+    def getQuantileCenters():
+        centers = []
+        for k1 in range(0,quantiles.size):
+            if(k1 == 0):
+                center = xmin + 0.5 * (quantiles[k1]-xmin)
+                centers.append(center)
+            else:
+                center = quantiles[k1-1] + 0.5 * (quantiles[k1]-quantiles[k1-1])
+                centers.append(center)
+        return centers
+
+    ax1.set_xlabel(r"{}".format(propertyName))            
+    ax1.set_xlim(xmin, xmax)     
+    ax2.set_xlim(xmin, xmax)        
+    ax2.set_xticks(getQuantileCenters(), np.arange(1,quantiles.size+1))    
+    ax2.set_xlabel("quantiles")    
+    plotfile = os.path.join(outFolderPlot, "distribution_{}.png".format(propertyName))
+    plt.savefig(plotfile, dpi=300)
+
+    dataVectorIndexed = getQuantileIndicesForDataVector(dataVector, [-1], quantiles)
+    values = []
+    valueId_value = {}
+    for i in range(1, quantiles.size+1):
+        value = "Q{}".format(i)
+        values.append(value)
+        valueId_value[i] = value
+
+    return dataVectorIndexed, values, valueId_value
+
+
+def getQuantilesForLargeDataVector(dataVector, propertyName, outFolderPlot, quantileStep, numBins=50, plot_quantileIdxMin=-1, plot_quantileIdxMax=-1, useLog_x = False, useLog_y = False):
+    quantileSteps = getQuantileSteps(quantileStep)
+    print("quantile steps", quantileSteps)
+    quantiles = np.quantile(dataVector, quantileSteps)
+    print("quantiles", quantiles)
+    
+    mpl.rcParams["font.size"] = 8
+
+    plt.clf()
+    fig = plt.figure(figsize=(7,4))
+    ax1 = fig.add_subplot(111)
+    ax2 = ax1.twiny()
+
+    _ = ax1.hist(dataVector, bins=numBins)
+    for quantile in quantiles:
+        ax1.axvline(x=quantile, color="black", linewidth=1)
+
+    if(plot_quantileIdxMin == -1):
+        xmin = np.min(dataVector)
+    else:
+        xmin = quantiles[plot_quantileIdxMin]
+    xmax = quantiles[plot_quantileIdxMax]
+    
+    def getQuantileCenters():
+        centers = []
+        for k1 in range(0,quantiles.size):
+            if(k1 == 0):
+                center = xmin + 0.5 * (quantiles[k1]-xmin)
+                centers.append(center)
+            else:
+                center = quantiles[k1-1] + 0.5 * (quantiles[k1]-quantiles[k1-1])
+                centers.append(center)
+        return centers
+
+    ax1.set_xlabel(r"{}".format(propertyName))            
+    ax1.set_xlim(xmin, xmax)             
+    ax2.set_xlim(xmin, xmax)        
+    if(useLog_x):
+        ax1.set_xscale("log")
+        ax2.set_xscale("log")
+    if(useLog_y):
+        ax1.set_yscale("symlog")
+        ax2.set_yscale("symlog")
+        ymax = dataVector.size * 10
+        ax1.set_ylim(0, ymax)
+        ax2.set_ylim(0, ymax)
+    ax2.set_xticks(getQuantileCenters(), np.arange(1,quantiles.size+1))    
+    ax2.set_xlabel("quantiles")    
+    plotfile = os.path.join(outFolderPlot, "distribution_{}.png".format(propertyName))
+    plt.savefig(plotfile, dpi=300)
+
+    dataVectorIndexed = np.digitize(dataVector, quantiles, right=True)
+    values = []
+    valueId_value = {}
+    for i in range(quantiles.size):
+        value = "Q{}".format(i+1)
+        values.append(value)
+        valueId_value[i] = value
+
+    return dataVectorIndexed, values, valueId_value
+
+
+def loadDataVector(filename, colIdx, delimiter=" ", skiprows=0):
+    with open(filename) as f:
+        lines = f.readlines()
+        x = np.zeros(len(lines)-skiprows, dtype=int)    
+        for i in range(skiprows, len(lines)):            
+            x[i-skiprows] = int(lines[i].rstrip().split(delimiter)[colIdx])
+        return x

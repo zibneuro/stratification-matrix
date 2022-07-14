@@ -8,7 +8,7 @@ Q1_demoVideo = [
     4,
     5,
     4,
-    5,
+    #5, excluded due to coauthorship
     5,
     4,
     5,
@@ -44,7 +44,7 @@ Q5_easierExploreDownload = [
     4,
     5,
     4,
-    5,
+    #5, excluded due to coauthorship
     3,
     3,
     4,
@@ -61,7 +61,7 @@ Q6_easierCommunicate = [
     3,
     3,
     4,
-    5,
+    #5, excluded due to coauthorship
     4,
     3,
     5,
@@ -77,7 +77,7 @@ Q7_ownResearch = [
     5,
     5,
     4,
-    4,
+    #4, excluded due to coauthorship
     1,
     3,
     2,
@@ -92,18 +92,10 @@ Q7_ownResearch = [
 if __name__ == "__main__":
 
     mpl.rcParams["axes.spines.top"] = False
-    mpl.rcParams["axes.spines.right"] = False
-    #mpl.rcParams["axes.labelsize"] = "medium"
-    #mpl.rcParams["xtick.labelsize"] = "small"
-    #mpl.rcParams["ytick.labelsize"] = "small"
-    #mpl.rcParams["legend.frameon"] = False
+    mpl.rcParams["axes.spines.right"] = False   
 
-    #mpl.rcParams["legend.fontsize"] = 10
-    #mpl.rcParams["font.size"] = 10
-    #mpl.rcParams["figure.max_open_warning"] = 0
-    #mpl.rcParams.update({'font.family': 'sans-serif'})    
-
-    questions = [Q1_demoVideo, Q2_easeOfUse, Q3_toolbox, Q5_easierExploreDownload, Q6_easierCommunicate, Q7_ownResearch]
+    #questions = [Q1_demoVideo, Q2_easeOfUse, Q3_toolbox, Q5_easierExploreDownload, Q6_easierCommunicate, Q7_ownResearch]
+    questions = [Q2_easeOfUse, Q3_toolbox, Q5_easierExploreDownload, Q6_easierCommunicate, Q7_ownResearch]
     for responses in questions:
         print(len(responses))
 
@@ -123,12 +115,13 @@ if __name__ == "__main__":
         responses = np.array(questions[k])                
         x_i = x[k] + (-0.5 * jitter_x) + jitter_x * np.random.random(responses.size)
         y_i = responses + (-0.5 * jitter_y) + jitter_y * np.random.random(responses.size)
-        plt.scatter(x_i, y_i, c="blue", marker=".", s=17)    
+        plt.scatter(x_i, y_i, c="darkblue", marker=".", s=17)    
         y_unique, counts_unqiue = np.unique(responses, return_counts=True)
         for j in range(0,y_unique.size):
-            plt.text(x[k]+annotationOffset_x, y_unique[j]+annotationOffset_y, str(counts_unqiue[j]), fontsize=8, c="blue")
-    plt.xticks(x, ["Q1", "Q2", "Q3", "Q5", "Q6", "Q7"])
+            plt.text(x[k]+annotationOffset_x, y_unique[j]+annotationOffset_y, str(counts_unqiue[j]), fontsize=9, c="darkblue")
+    #plt.xticks(x, ["Q1", "Q2", "Q3", "Q5", "Q6", "Q7"])
+    plt.xticks(x, ["Q1", "Q2", "Q3", "Q4", "Q5"])
     plt.yticks([1,2,3,4,5], [r"$--1$", r"$-2$", r"$3$", r"$+4$", r"$++5$"])
     plt.xlim(0.5,len(questions)+0.5)
-    plt.savefig("responses.png", dpi=300)
+    plt.savefig("responses.png", dpi=500)
     
