@@ -1,0 +1,27 @@
+.menuBox {
+    padding: 5px;
+    background-color: #eeeeee;
+    border: 1px solid #222831;    
+}
+
+.menuBoxWhite {
+    padding: 5px;
+    background-color:  #eeeeee;
+    border: 1px solid #222831;     
+}
+
+.matrixButton{
+    background-color: #c1a57b;
+    border: #c1a57b; 
+    color: white;
+    padding: 2px;
+}
+.matrixBlackButton{
+    background-color: #222831; 
+    border:  #222831;  
+    color: white;
+    padding: 2px;
+}
+.matrixHeading{
+    color: #142850;
+}
