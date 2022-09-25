@@ -8,6 +8,11 @@ export class TileManager {
         this.channelSettings = this.getDefaultChannelSettings();            
         this.selectedTiles = {};     
         this.cachedData = {}; // hash of row/col leafs -> [dataFlat, dataFlat]
+
+        this.activeExpandedSelectionHash = undefined;
+        this.expandedLeafsRow = [];
+        this.expandedLeafsCol = [];
+
         this.clearAll()
 
         this.OnTileDataChanged = new BABYLON.Observable();
@@ -23,7 +28,8 @@ export class TileManager {
         return h;
     };    
 
-    setActiveLeafs(leafsRow, leafsCol) {
+    
+    setActiveLeafs(leafsRow, leafsCol, expandedLeafsRow, expandedLeafsCol) {
         
         const isEmpty = (leafs) => {
             if(leafs.length == 0){
@@ -41,7 +47,20 @@ export class TileManager {
             let numTiles = numRows * numCols;
             return numTiles > LAYOUTPARAMS.tileMaxCount;
         }
-                
+
+        // expanded selection 
+        let stringRowExpanded = JSON.stringify(expandedLeafsRow);        
+        let stringColExpanded = JSON.stringify(expandedLeafsCol);
+        
+        let hashCodeForExpandedSelection = this.getHashCode(stringRowExpanded + stringColExpanded);
+        if(hashCodeForExpandedSelection !== this.activeExpandedSelectionHash){
+            this.expandedLeafsRow = deepCopy(expandedLeafsRow);
+            this.expandedLeafsCol = deepCopy(expandedLeafsCol);
+            this.activeExpandedSelectionHash = hashCodeForExpandedSelection;
+            this.cachedData = {}
+        }
+         
+        // visible selection
         let stringRow = JSON.stringify(leafsRow);        
         let stringCol = JSON.stringify(leafsCol);
         let selectionEmpty = isEmpty(leafsRow) || isEmpty(leafsCol);
@@ -56,13 +75,15 @@ export class TileManager {
         this.leafsRow = deepCopy(leafsRow);
         this.leafsCol = deepCopy(leafsCol);
 
-        if(this.cachedData[hashCodeForSelection] !== undefined){
+        if(this.cachedData[hashCodeForSelection] !== undefined) {
+            this.updateTilesDict();
+        } else if (this.cachedData[hashCodeForExpandedSelection] !== undefined) {
             this.updateTilesDict();
         } else if (selectionEmpty) {            
             this.OnTileDataChanged.notifyObservers({});
         } else {
 
-            if(isTooLarge(leafsRow, leafsCol)){
+            if(isTooLarge(expandedLeafsRow, expandedLeafsCol)){
                 console.log("served request aborted, selection too large");
                 return;
             }
@@ -70,9 +91,9 @@ export class TileManager {
             // request data
             let request = {
                 profile: this.dataManager.activeProfile,
-                rowSelectionStack: deepCopy(leafsRow),
-                colSelectionStack: deepCopy(leafsCol),
-                selectionHashCode : hashCodeForSelection,
+                rowSelectionStack: deepCopy(expandedLeafsRow),
+                colSelectionStack: deepCopy(expandedLeafsCol),
+                selectionHashCode : hashCodeForExpandedSelection,
                 requestedTiles : []
             }
 
@@ -80,20 +101,71 @@ export class TileManager {
             this.dataManager.getTileData(request, (tileData) => {
                 //console.log("server response", tileData);
                 if(tileData.length){
-                    that.cachedData[hashCodeForSelection] = tileData;
+                    that.cachedData[hashCodeForExpandedSelection] = tileData;
                     that.updateTilesDict();
                 }                            
             });
-        }        
-        
+        }            
     }
 
+    aggregateFromExpanded() {
+        //try {
+        let tileDataExpanded = this.cachedData[this.activeExpandedSelectionHash];
+    
+        let nRowsExpanded = this.expandedLeafsRow.length;
+        let nColsExpanded = this.expandedLeafsCol.length;
+        let nRows = this.leafsRow.length;
+        let nCols = this.leafsCol.length;
+        let kRows = nRowsExpanded / nRows;
+        let kCols = nColsExpanded / nCols;
+
+        let tileDataAggregated = [];
+        for (let channelIdx = 0; channelIdx < tileDataExpanded.length; channelIdx++) {
+            let dataForChannel = tileDataExpanded[channelIdx];
+
+            let aggregatedMatrix = [];
+            for(let i=0; i<nRows; i++){
+                let aggregatedRow = [];
+
+                for(let j=0; j<nCols; j++){    
+                    let aggregatedValue = 0;
+
+                    for(let ki=0; ki<kRows; ki++){
+                        let idx_i = i * kRows + ki;
+                        for(let kj=0; kj<kCols; kj++){
+                            let idx_j = j * kCols + kj;
+                            aggregatedValue += dataForChannel[idx_i][idx_j]; 
+                        }        
+                    }
+                    aggregatedRow.push(aggregatedValue);
+                }
+                aggregatedMatrix.push(aggregatedRow);
+            }
+            tileDataAggregated.push(aggregatedMatrix);
+        }
+        this.cachedData[this.activeSelectionHash] = tileDataAggregated;
+        
+        //} catch (e) {
+        //    console.log(e)
+        //}
+    }
+
+
     updateTilesDict() {
-        let activeSelectionHash = this.activeSelectionHash;
-        if(activeSelectionHash === undefined){
+        if(this.activeExpandedSelectionHash === undefined){
             return;
         }
-        let tileData = this.cachedData[activeSelectionHash];
+        if(this.cachedData[this.activeExpandedSelectionHash] == undefined){
+            return;
+        }
+        if(this.activeSelectionHash === undefined){
+            return;
+        }
+        let tileData = this.cachedData[this.activeSelectionHash];
+        if(tileData === undefined){
+            this.aggregateFromExpanded();
+            tileData = this.cachedData[this.activeSelectionHash];
+        }
         if(tileData === undefined){
             return;
         }
@@ -140,6 +212,7 @@ export class TileManager {
         this.OnTileDataChanged.notifyObservers({});
         this.OnTileSelectionChanged.notifyObservers({});
     }
+
 
     setMaxValuesCombined() {
         let channel0 = this.maxValuesIndependent[0];

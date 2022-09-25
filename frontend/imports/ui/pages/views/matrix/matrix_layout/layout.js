@@ -2,14 +2,14 @@ import { LAYOUTPARAMS } from '../matrix_views/matrix_constants'
 import { deepCopy } from '../../core/utilCore';
 
 export class Layout {
-    constructor(paper, canvas, selection, tileManager, dataManager) {
+    constructor(paper, canvas, selection, tileManager, dataManager, w, h) {
         this.tileManager = tileManager;
         this.dataManager = dataManager;
         this.paper = paper;
         this.canvas = canvas;
         this.selection = selection;
-        this.w = canvas.width;
-        this.h = canvas.height;
+        this.w = w;
+        this.h = h;
         this.reorderingActive = false;
         this.reorderingDepth_kr = undefined;
         this.reorderingDepth_kc = undefined;
@@ -39,11 +39,11 @@ export class Layout {
         if(this.reorderingDepth_kr === undefined){
             return;
         }
-        if(this.reorderingDepth_kr !== kr){
+        if(this.reorderingDepth_kr > kr){
             this.resetReordering();
             return;
         }
-        if(this.reorderingDepth_kc !== kc){
+        if(this.reorderingDepth_kc > kc){
             this.resetReordering();
             return;
         }
@@ -57,8 +57,12 @@ export class Layout {
 
             const getReorderedLeafs = (leafs, perm) =>{                
                 let reorderedLeafs = [];
+                let kExpanded = leafs.length / perm.length;
                 for (let i = 0; i<perm.length; i++){
-                    reorderedLeafs.push(leafs[perm[i]]);
+                    for(let k=0; k<kExpanded; k++){
+                        let idx = perm[i] * kExpanded + k 
+                        reorderedLeafs.push(leafs[idx]);
+                    }
                 }
                 return reorderedLeafs;                
             }
@@ -68,12 +72,16 @@ export class Layout {
             this.reorderingDepth_kr = kr;
             this.reorderingDepth_kc = kc;
 
-            if(reordering.permutation.rows !== undefined){                
-                this.leafsPerLevelRow[kr] = getReorderedLeafs(this.leafsPerLevelRow[kr], reordering.permutation.rows);
+            if(reordering.permutation.rows !== undefined){         
+                for(let k=kr; k<this.baseLayoutConstants.maxNestingDepthRow; k++){
+                    this.leafsPerLevelRow[k] = getReorderedLeafs(this.leafsPerLevelRow[k], reordering.permutation.rows);
+                }       
             }
 
-            if(reordering.permutation.cols !== undefined){                                            
-                this.leafsPerLevelCol[kc] = getReorderedLeafs(this.leafsPerLevelCol[kc], reordering.permutation.cols);
+            if(reordering.permutation.cols !== undefined){         
+                for(let k=kc; k<this.baseLayoutConstants.maxNestingDepthCol; k++){                                   
+                    this.leafsPerLevelCol[k] = getReorderedLeafs(this.leafsPerLevelCol[k], reordering.permutation.cols);
+                }
             }
             this.reorderingActive = true;
         }
@@ -205,7 +213,9 @@ export class Layout {
             reordered : this.reorderingActive    
         }       
 
-        this.tileManager.setActiveLeafs(this.leafsPerLevelRow[kr], this.leafsPerLevelCol[kc]);
+        let expandedLeafsRow = this.leafsPerLevelRow[this.baseLayoutConstants.maxNestingDepthRow - 1];
+        let expandedLeafsCol = this.leafsPerLevelCol[this.baseLayoutConstants.maxNestingDepthCol - 1];
+        this.tileManager.setActiveLeafs(this.leafsPerLevelRow[kr], this.leafsPerLevelCol[kc], expandedLeafsRow, expandedLeafsCol);
     }
 
 

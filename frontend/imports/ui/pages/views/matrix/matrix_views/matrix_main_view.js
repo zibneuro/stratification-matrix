@@ -12,7 +12,7 @@ export class MainView {
         this.width = canvas.width;
         this.height = canvas.height;
         this.paper = paper;
-        this.layout = new Layout(this.paper, this.canvas, this.dataManager.selection, this.tileManager, this.dataManager);
+        this.layout = new Layout(this.paper, this.canvas, this.dataManager.selection, this.tileManager, this.dataManager, this.width, this.height);
         this.canvasBounds = new this.paper.Rectangle(0, 0, this.canvas.width, this.canvas.height);
 
         paper.setup(canvas);
@@ -45,7 +45,7 @@ export class MainView {
     }
 
     updateSelection(selection) {
-        this.layout = new Layout(this.paper, this.canvas, this.dataManager.selection, this.tileManager, this.dataManager);
+        this.layout = new Layout(this.paper, this.canvas, this.dataManager.selection, this.tileManager, this.dataManager, this.width, this.height);
         this.render();
     }
 
